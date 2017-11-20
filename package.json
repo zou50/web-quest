@@ -1,0 +1,30 @@
+{
+  "name": "web-quest",
+  "version": "1.0.0",
+  "description": "webQuest is an online medieval RPG with multiplayer features",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zou50/web-quest.git"
+  },
+  "keywords": [
+    "node",
+    "socket",
+    "express",
+    "html5",
+    "cs252"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zou50/web-quest/issues"
+  },
+  "homepage": "https://github.com/zou50/web-quest#readme",
+  "dependencies": {
+    "express": "^4.16.2",
+    "socket.io": "^2.0.4"
+  }
+}
