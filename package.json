@@ -2,7 +2,7 @@
   "name": "web-quest",
   "version": "1.0.0",
   "description": "webQuest is an online medieval RPG with multiplayer features",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
