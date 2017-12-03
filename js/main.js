@@ -2,7 +2,7 @@
 var WebQuest = WebQuest || {};
 
 WebQuest.game = new Phaser.Game(
-    800, 600,
+    800, 640,
     Phaser.AUTO,
     document.getElementById('app')
 );
