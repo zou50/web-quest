@@ -1,4 +1,3 @@
-/* Primary Phaser Game Object */
 var WebQuest = WebQuest || {};
 
 WebQuest.Boot = function() {};
@@ -25,7 +24,3 @@ WebQuest.Boot.prototype = {
         this.state.start('Preload');
     }
 }
-
-/******************************/
-
-
