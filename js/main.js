@@ -2,9 +2,10 @@
 var WebQuest = WebQuest || {};
 
 WebQuest.game = new Phaser.Game(
-    800, 640,
+    400, 320,
     Phaser.AUTO,
-    document.getElementById('app')
+    document.getElementById('app'),
+    this, false, false
 );
 
 // Game state

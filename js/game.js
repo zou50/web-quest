@@ -19,6 +19,7 @@ WebQuest.Game.prototype = {
 
         this.game.physics.arcade.enable(this.player);
         this.game.camera.follow(this.player);
+        this.game.camera.setSize(400, 320);
 
         this.cursors = this.game.input.keyboard.createCursorKeys();
     },
@@ -39,6 +40,6 @@ WebQuest.Game.prototype = {
     },
     render: function() {
         this.game.debug.cameraInfo(this.game.camera, 32, 32);
-        this.game.debug.spriteCoords(this.player, 32, 580);
+        this.game.debug.spriteCoords(this.player, 32, 128);
     }
 }
