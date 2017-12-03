@@ -12,11 +12,11 @@ WebQuest.Boot.prototype = {
         this.game.stage.backgroundColor = "#000";
 
         // scaling options
-        this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+        this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
 
         // center
-        this.scale.pageAlignHorizontally = true;
-        this.scale.pageAlignVertically = true;
+        this.game.scale.pageAlignHorizontally = true;
+        this.game.scale.pageAlignVertically = true;
 
         // physics
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
