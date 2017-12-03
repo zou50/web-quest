@@ -1,9 +1,16 @@
 // Main - initialize Phaser game
+var WebQuest = WebQuest || {};
 
-var game = new Phaser.Game(
+WebQuest.game = new Phaser.Game(
     800, 600,
     Phaser.AUTO,
     document.getElementById('app')
 );
-game.state.add('Game', Game);
-game.state.start('Game');
+
+// Game state
+WebQuest.game.state.add('Boot', WebQuest.Boot);
+WebQuest.game.state.add('Preload', WebQuest.Preload);
+WebQuest.game.state.add('Game', WebQuest.Game);
+
+// Start
+WebQuest.game.state.start('Boot');

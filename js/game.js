@@ -1,19 +1,10 @@
-/* Primary Phaser Game Object */
+var WebQuest = WebQuest || {};
 
-var Game = {};
+// title
+WebQuest.Game = function() {};
 
-Game.init = function() {
-
+WebQuest.Game.prototype = {
+    create: function() {
+        
+    }
 }
-
-Game.preload = function() {
-
-}
-
-Game.create = function() {
-
-}
-
-/******************************/
-
-
