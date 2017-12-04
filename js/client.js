@@ -1,32 +1,28 @@
-var Client = {};
+// var Client = {};
 
-Client.socket = io.connect();
+// Client.socket = io.connect();
 
-// Listen
-Client.socket.on('newPlayer', function(data) {
-    Game.addNewPlayer(data.id, data.x, data.y);
-});
+// // Functions
+// Client.newPlayer = function(player) {
+//     Client.socket.emit('newPlayer', {x: player.x, y: player.y})
+// }
 
-Client.socket.on('remove', function(id) {
-    Game.removePlayer(id);
-})
+// Client.movePlayer = function(player) {
+//     Client.socket.emit('movePlayer', {x: player.x, y: player.y});
+// }
 
-Client.socket.on('allPlayers', function(data) {
-    for (var i = 0; i < data.length; i++) {
-        Game.addNewPlayer(data[i].id, data[i].x, data[i].y);
-    }
-});
+// // Listen
+// Client.socket.on('player connect', Game.onSocketConnected);
 
-Client.socket.on('move', function(player) {
-    Game.movePlayer(player.id, player.x, player.y);
-});
+// Client.socket.on('player disconnect', Game.onSocketDisconnected);
 
-// Functions
-Client.askNewPlayer = function() {
-    Client.socket.emit('newPlayer');
-}
+// Client.socket.on('new player', Game.onNewPlayer);
 
-Client.handleMove = function(x, y) {
-    // console.log("move");
-    Client.socket.emit('keyMove', {x: x, y: y});
-}
+// Client.socket.on('move player', Game.onMovePlayer);
+
+// Client.socket.on('remove player', Game.onRemovePlayer);
+
+
+
+
+

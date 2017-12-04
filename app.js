@@ -7,6 +7,8 @@ var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 
+var Player = require('./js/Player');
+
 // path handling
 
 app.use('/css', express.static(__dirname + '/css'));
@@ -24,53 +26,67 @@ server.listen(process.env.PORT || 3000, function() {
 
 // connections
 
-connections = [];
+var connections = [];
+var players = [];
 
 server.lastPlayerID = 0;
 
-io.sockets.on('connection', function(socket) {
-    connections.push(socket);
-    console.log("new connection %s, total: %s", socket.id, connections.length);
+io.sockets.on('connection', onSocketConnection);
 
-    socket.on('disconnect', function(data) {
-        connections.splice(connections.indexOf(socket), 1);
-        console.log("disconnect %s, total %s", socket.id, connections.length);
-    });
+function onSocketConnection(client) {
+    connections.push(client.id);
+    console.log("New connection %s, total: %s", client.id, connections.length);
 
-    socket.on('newPlayer', function(player) {
-        socket.player = {
-            id: server.lastPlayerID++,
-            x: randomInt(0, 200),
-            y: randomInt(0, 200)
-        }
-        socket.emit('allPlayers', getAllPlayers());
-        socket.broadcast.emit('newPlayer', socket.player);
-
-        socket.on('keyMove', function(data) {
-            socket.player.x += data.x;
-            socket.player.y += data.y;
-            io.emit('move', socket.player);
-        });
-
-        socket.on('disconnect', function() {
-            io.emit('remove', socket.player.id);
-        });
-    });
-});
-
-function getAllPlayers() {
-    var players = [];
-    Object.keys(io.sockets.connected).forEach(function(socketID) {
-        var player = io.sockets.connected[socketID].player;
-        if (player)
-            players.push(player);
-    });
-    return players;
+    client.on('disconnect', onClientDisconnect);
+    client.on('new player', onNewPlayer);
+    client.on('move player', onMovePlayer);
 }
 
-function randomInt(low, high) {
-    return Math.floor(Math.random() * (high - low) + low);
+function onClientDisconnect() {
+    console.log("Disconnect %s, total: %s", this.id, connections.length);
+
+    var removePlayer = playerById(this.id);
+    players.splice(players.indexOf(removePlayer), 1);
+
+    this.broadcast.emit('remove player', {id: this.id});
 }
+
+function onNewPlayer(data) {
+    var newPlayer = new Player(data.x, data.y);
+    newPlayer.id = this.id;
+
+    this.broadcast.emit('new player', {id: newPlayer.id, x: newPlayer.getX(), y: newPlayer.getY()});
+
+    for (var i = 0; i < players.length; i++) {
+        var existingPlayer = players[i];
+        this.emit('new player', {id: existingPlayer.id, x: existingPlayer.getX(), y: existingPlayer.getY()});
+    }
+
+    players.push(newPlayer);
+}
+
+function onMovePlayer(data) {
+    var movePlayer = playerById(this.id);
+
+    movePlayer.setX(data.x);
+    movePlayer.setY(data.y);
+
+    this.broadcast.emit('move player', {id: movePlayer.id, x: movePlayer.getX(), y: movePlayer.getY()});
+}
+
+function playerById(id) {
+    for (var i = 0; i < players.length; i++) {
+        if (players[i].id === id)
+            return players[i];
+    }
+    return false;
+}
+
+
+
+
+
+
 
 
 

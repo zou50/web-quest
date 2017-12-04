@@ -1,7 +1,7 @@
 var Game = {};
 
 Game.create = function() {
-    Game.playerMap = {};
+    socket = io.connect();
 
     // initialize tiled map
     map = game.add.tilemap('map1', 16, 16);
@@ -16,61 +16,110 @@ Game.create = function() {
     map.setCollisionBetween(1, 2000, true, 'blockedLayer');
 
     // camera settings
-
-    this.game.camera.setSize(400, 320);
-	
-	npcs = this.game.add.group();
-	npcs.enableBody = true;
-	var npc = npcs.create(300,176,'player');
-
     game.camera.setSize(400, 320);
 
+	// npcs = game.add.group();
+	// npcs.enableBody = true;
+	// var npc = npcs.create(300,176,'player');
+
+    // other players
+    players = [];
 
     // input
     cursors = game.input.keyboard.createCursorKeys();
 
-    // client
-    Client.askNewPlayer();
-	
-	
+    // player
+    player = game.add.sprite(randomInt(0, 200), randomInt(0, 200), 'player');
+    game.physics.arcade.enable(player);
+    player.body.collideWorldBounds = true;
+    player.body.bounce.setTo(1, 1);
+    game.camera.follow(player);
+
+    // Client.newPlayer(player.body);
+    setEventHandlers();
+}
+
+var setEventHandlers = function() {
+    // Socket connection successful
+    socket.on('connect', Game.onSocketConnected)
+
+    // Socket disconnection
+    socket.on('disconnect', Game.onSocketDisconnect)
+
+    // New player message received
+    socket.on('new player', Game.onNewPlayer)
+
+    // Player move message received
+    socket.on('move player', Game.onMovePlayer)
+
+    // Player removed message received
+    socket.on('remove player', Game.onRemovePlayer)
 }
 
 Game.update = function() {
+    game.physics.arcade.collide(player, blockedLayer);
+
+    player.body.velocity.x = 0;
+    player.body.velocity.y = 0;
+
     if (cursors.up.isDown)
-        Client.handleMove(0, -1);
+        player.body.velocity.y -= 50;
     else if (cursors.down.isDown)
-        Client.handleMove(0, 1);
+        player.body.velocity.y += 50;
     if (cursors.left.isDown)
-        Client.handleMove(-1, 0);
+        player.body.velocity.x -= 50;
     else if (cursors.right.isDown)
-        Client.handleMove(1, 0);
+        player.body.velocity.x += 50;
+
+    socket.emit('move player', { x: player.x, y: player.y });
 }
 
 Game.render = function() {
     // game.debug.cameraInfo(game.camera, 32, 32);
 }
 
-Game.addNewPlayer = function(id, x, y) {
-    console.log("game new player");
-    var newP = game.add.sprite(x, y, 'player');
-    Game.playerMap[id] = newP;
-    game.physics.arcade.enable(newP);
-    console.log(id);
+Game.onSocketConnected = function() {
+    console.log("Connected");
+
+    socket.emit('new player', { x: player.x, y: player.y });
 }
 
-Game.removePlayer = function(id) {
-    Game.playerMap[id].destroy();
-    delete Game.playerMap[id];
+Game.onSocketDisconnected = function() {
+    console.log("Disconnected");
 }
 
-Game.movePlayer = function(id, x, y) {
-    var player = Game.playerMap[id];
-    player.x = x;
-    player.y = y;
-    console.log(player.body.x);
+Game.onNewPlayer = function(data) {
+    console.log("New player");
+
+    players.push(new RemotePlayer(data.id, game, player, data.x, data.y));
 }
 
+Game.onMovePlayer = function(data) {
+    console.log("move");
+    var movePlayer = playerById(data.id);
+    movePlayer.player.x = data.x;
+    movePlayer.player.y = data.y;
+}
 
+Game.onRemovePlayer = function(data) {
+    var removed = playerById(data.id);
+
+    removed.player.kill();
+
+    players.splice(players.indexOf(removed), 1);
+}
+
+function randomInt(low, high) {
+    return Math.floor(Math.random() * (high - low) + low);
+}
+
+function playerById(id) {
+    for (var i = 0; i < players.length; i++) {
+        if (players[i].player.name === id)
+            return players[i];
+    }
+    return false;
+}
 
 
 
