@@ -28,6 +28,9 @@ Game.create = function() {
 
     // input
     cursors = game.input.keyboard.createCursorKeys();
+	keys = game.input.keyboard.addKeys({'action': Phaser.KeyCode.Z, 'cancel': Phaser.KeyCode.X, 'item': Phaser.KeyCode.A})
+	keys.action.onDown.add(attack,this);
+
 
     // client
     Client.askNewPlayer();
