@@ -1,4 +1,4 @@
-var Player = function(startX, startY) {
+var ServerPlayer = function(startX, startY) {
     var x = startX;
     var y = startY;
 
@@ -29,4 +29,4 @@ var Player = function(startX, startY) {
     }
 }
 
-module.exports = Player;
+module.exports = ServerPlayer;

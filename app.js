@@ -7,7 +7,7 @@ var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 
-var Player = require('./js/Player');
+var ServerPlayer = require('./js/ServerPlayer');
 var ServerMob = require('./js/ServerMob');
 
 // path handling
@@ -56,7 +56,7 @@ function onClientDisconnect() {
 
     if (!removePlayer)
         return;
-    
+
     players.splice(players.indexOf(removePlayer), 1);
 
     this.broadcast.emit('remove player', {id: this.id});
@@ -65,7 +65,7 @@ function onClientDisconnect() {
 /* PLAYERS */
 
 function onNewPlayer(data) {
-    var newPlayer = new Player(data.x, data.y);
+    var newPlayer = new ServerPlayer(data.x, data.y);
     newPlayer.id = this.id;
 
     // notify others of self
@@ -81,8 +81,6 @@ function onNewPlayer(data) {
         var existingMob = mobs[i];
         this.emit('new mob', {id: existingMob.id, x: existingMob.getX(), y: existingMob.getY()});
     }
-
-    onNewMob({x: randomInt(0, 50), y: randomInt(0, 50)});
 
     players.push(newPlayer);
 }

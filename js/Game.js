@@ -5,7 +5,7 @@ Game.create = function() {
     socket = io.connect();
 
 	timer = game.time.create(false);
-	
+
     // initialize tiled map
     map = game.add.tilemap('map1', 16, 16);
     map.addTilesetImage('tiles', 'gameTiles');
@@ -27,6 +27,10 @@ Game.create = function() {
     // baddies
     mobs = [];
 
+    // client player
+    player = new ClientPlayer(game, randomInt(0, 200), randomInt(0, 200));;
+    game.camera.follow(player.sprite);
+
     // input
     cursors = game.input.keyboard.createCursorKeys();
 	keys = game.input.keyboard.addKeys({
@@ -43,22 +47,9 @@ Game.create = function() {
     keys.removeAllZ.onDown.add(() => {
         socket.emit('remove all mobs');
     });
-	
-	//On attack press
-	keys.action.onDown.add(attack,this);
-	//keys.action.onUp.add(stopAtk,this);
- 	
-    // client player
-    player = game.add.sprite(randomInt(0, 200), randomInt(0, 200), 'characters', sprites["white"]);
-    game.physics.arcade.enable(player);
-    player.body.collideWorldBounds = true;
-    player.body.bounce.setTo(1, 1);
-    player.anchor.setTo(0.5, 0.5);
-
-    game.camera.follow(player);
-
-    weapon = game.add.sprite(player.x + 11, player.y, 'characters', sprites["battleaxe"]);
-    weapon.anchor.setTo(0.5, 0.5);
+ 
+    //On attack press
+    keys.action.onDown.add(player.attack, player);
 
     setEventHandlers();
 	timer.start();
@@ -94,11 +85,12 @@ var setEventHandlers = function() {
 }
 
 Game.update = function() {
-    game.physics.arcade.collide(player, blockedLayer);
+    game.physics.arcade.collide(player.sprite, blockedLayer);
+
     for (var i = 0; i < players.length; i++) {
         if (players[i].sprite.alive) {
             players[i].update();
-            game.physics.arcade.collide(player, players[i].sprite);
+            game.physics.arcade.collide(player.sprite, players[i].sprite);
         }
     }
     for (var i = 0; i < mobs.length; i++) {
@@ -111,37 +103,22 @@ Game.update = function() {
         }
     }
 
-    weapon.x = player.x + 11;
-    weapon.y = player.y;
-
-    playerSpeed = 65;
-    player.body.velocity.x = 0;
-    player.body.velocity.y = 0;
+    player.update();
 
     if (cursors.up.isDown)
-        player.body.velocity.y -= playerSpeed;
+        player.moveUp();
     else if (cursors.down.isDown)
-        player.body.velocity.y += playerSpeed;
+        player.moveDown();
     if (cursors.left.isDown)
-        player.body.velocity.x -= playerSpeed;
+        player.moveLeft();
     else if (cursors.right.isDown)
-        player.body.velocity.x += playerSpeed;
+        player.moveRight();
 
-    socket.emit('move player', { x: player.x, y: player.y });
+    socket.emit('move player', { x: player.sprite.x, y: player.sprite.y });
 }
 
 Game.render = function() {
     // game.debug.cameraInfo(game.camera, 32, 32);
-}
-
-function attack() {
-    slashfx = game.add.sprite(player.x+15,player.y,'slash');
-    slashfx.anchor.setTo(0.5, 0.5);
-    timer.add(125,stopAtk,this);
-}
-
-function stopAtk() {
-    slashfx.kill();
 }
 
 /* CONNECTIONS */
@@ -149,7 +126,7 @@ function stopAtk() {
 Game.onSocketConnected = function() {
     console.log("Connected");
 
-    socket.emit('new player', { x: player.x, y: player.y });
+    socket.emit('new player', { x: player.sprite.x, y: player.sprite.y });
 }
 
 Game.onSocketDisconnected = function() {
@@ -161,7 +138,7 @@ Game.onSocketDisconnected = function() {
 Game.onNewPlayer = function(data) {
     console.log("New player");
 
-    players.push(new RemotePlayer(data.id, game, player, data.x, data.y));
+    players.push(new RemotePlayer(data.id, game, player.sprite, data.x, data.y));
 }
 
 Game.onMovePlayer = function(data) {

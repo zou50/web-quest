@@ -1,4 +1,4 @@
-var RemotePlayer = function (index, game, sprite, startX, startY) {
+var RemotePlayer = function(index, game, sprite, startX, startY) {
     var x = startX;
     var y = startY;
 
@@ -17,7 +17,7 @@ var RemotePlayer = function (index, game, sprite, startX, startY) {
     this.lastPosition = { x: x, y: y }
 }
 
-RemotePlayer.prototype.update = function () {
+RemotePlayer.prototype.update = function() {
     this.lastPosition.x = this.sprite.x;
     this.lastPosition.y = this.sprite.y;
 }
