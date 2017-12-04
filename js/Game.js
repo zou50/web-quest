@@ -1,8 +1,10 @@
 var Game = {};
-
+var timer;
 Game.create = function() {
     socket = io.connect();
 
+	timer = game.time.create(false);
+	
     // initialize tiled map
     map = game.add.tilemap('map1', 16, 16);
     map.addTilesetImage('tiles', 'gameTiles');
@@ -24,15 +26,11 @@ Game.create = function() {
     // input
     cursors = game.input.keyboard.createCursorKeys();
 	keys = game.input.keyboard.addKeys({'action': Phaser.KeyCode.Z, 'cancel': Phaser.KeyCode.X, 'item': Phaser.KeyCode.A})
+	
+	//On attack press
 	keys.action.onDown.add(attack,this);
-	keys.action.onUp.add(stopAtk,this);
-	
-	//Spritesheet example on adding a sprite, 	0-624, 636 = looped
-	npc1 = game.add.sprite(0,0,'characters', sprites["white_male"]);
-	npc2 = game.add.sprite(0,16,'characters', sprites["tan_male"]);
-	weapon = game.add.sprite(0,32,'characters', sprites["black_male"]);
-    game.add.sprite(0, 48, 'characters', sprites["shortbow"]);
-	
+	//keys.action.onUp.add(stopAtk,this);	
+ 	
     // player
     player = game.add.sprite(randomInt(0, 200), randomInt(0, 200), 'characters', sprites["white"]);
     game.physics.arcade.enable(player);
@@ -40,10 +38,12 @@ Game.create = function() {
     player.body.bounce.setTo(1, 1);
     game.camera.follow(player);
 
-    axe = game.add.sprite(player.x + 11, player.y, 'characters', 537);
+    weapon = game.add.sprite(player.x + 11, player.y, 'characters', sprites["battleaxe"]);
 
     // Client.newPlayer(player.body);
     setEventHandlers();
+	timer.start();
+
 }
 
 var setEventHandlers = function() {
@@ -72,8 +72,8 @@ Game.update = function() {
         }
     }
 
-    axe.x = player.x + 11;
-    axe.y = player.y;
+    weapon.x = player.x + 11;
+    weapon.y = player.y;
 
     player.body.velocity.x = 0;
     player.body.velocity.y = 0;
@@ -128,7 +128,8 @@ Game.onRemovePlayer = function(data) {
 }
 
 function attack() {
-    slashfx = game.add.sprite(0,0,'slash');
+    slashfx = game.add.sprite(player.x+15,player.y,'slash');
+	timer.add(125,stopAtk,this);
 }
 
 function stopAtk() {
