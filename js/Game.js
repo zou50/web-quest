@@ -32,7 +32,16 @@ Game.create = function() {
 	keys = game.input.keyboard.addKeys({
         'action': Phaser.KeyCode.Z,
         'cancel': Phaser.KeyCode.X,
-        'item': Phaser.KeyCode.A
+        'item': Phaser.KeyCode.A,
+        // admin
+        'spawnZ': Phaser.KeyCode.Q,
+        'removeAllZ': Phaser.KeyCode.W
+    });
+    keys.spawnZ.onDown.add(() => {
+        socket.emit('new mob', {x: randomInt(0, 200), y: randomInt(0, 200)});
+    });
+    keys.removeAllZ.onDown.add(() => {
+        socket.emit('remove all mobs');
     });
 	
 	//On attack press
@@ -74,8 +83,14 @@ var setEventHandlers = function() {
     // New mob message received
     socket.on('new mob', Game.onNewMob);
 
-    // Move mob messages received
+    // Move mob message received
     socket.on('move mob', Game.onMoveMob);
+
+    // Remove mob message received
+    socket.on('remove mob', Game.onRemoveMob);
+
+    // Remove all mobs message received
+    socket.on('remove all mobs', Game.onRemoveAllMobs);
 }
 
 Game.update = function() {
@@ -119,6 +134,18 @@ Game.render = function() {
     // game.debug.cameraInfo(game.camera, 32, 32);
 }
 
+function attack() {
+    slashfx = game.add.sprite(player.x+15,player.y,'slash');
+    slashfx.anchor.setTo(0.5, 0.5);
+    timer.add(125,stopAtk,this);
+}
+
+function stopAtk() {
+    slashfx.kill();
+}
+
+/* CONNECTIONS */
+
 Game.onSocketConnected = function() {
     console.log("Connected");
 
@@ -129,6 +156,8 @@ Game.onSocketDisconnected = function() {
     console.log("Disconnected");
 }
 
+/* PLAYERS */
+
 Game.onNewPlayer = function(data) {
     console.log("New player");
 
@@ -138,6 +167,9 @@ Game.onNewPlayer = function(data) {
 Game.onMovePlayer = function(data) {
     var movePlayer = playerById(data.id);
 
+    if (!movePlayer)
+        return;
+
     movePlayer.sprite.x = data.x;
     movePlayer.sprite.y = data.y;
 }
@@ -145,10 +177,15 @@ Game.onMovePlayer = function(data) {
 Game.onRemovePlayer = function(data) {
     var removePlayer = playerById(data.id);
 
+    if (!removePlayer)
+        return;
+
     removePlayer.sprite.kill();
 
     players.splice(players.indexOf(removePlayer), 1);
 }
+
+/* MOBS */
 
 Game.onNewMob = function(data) {
     console.log("New mob");
@@ -159,6 +196,9 @@ Game.onNewMob = function(data) {
 Game.onMoveMob = function(data) {
     var moveMob = mobById(data.id);
 
+    if (!moveMob)
+        return;
+
     moveMob.sprite.x = data.x;
     moveMob.sprite.y = data.y;
 }
@@ -166,23 +206,29 @@ Game.onMoveMob = function(data) {
 Game.onRemoveMob = function(data) {
     var removeMob = mobById(data.id);
 
+    if (!removeMob)
+        return;
+
     removeMob.sprite.kill();
 
     mobs.splice(players.indexOf(removeMob), 1);
 }
 
+Game.onRemoveAllMobs = function(data) {
+    for (var i = 0; i < mobs.length; i++) {
+        mobs[i].sprite.kill();
+    }
+    mobs = [];
+}
+
+/* HELPER FUNCTIONS */
+
 Game.getPlayer = function() {
     return player;
 }
 
-function attack() {
-    slashfx = game.add.sprite(player.x+15,player.y,'slash');
-    slashfx.anchor.setTo(0.5, 0.5);
-	timer.add(125,stopAtk,this);
-}
-
-function stopAtk() {
-    slashfx.kill();
+Game.getPlayers = function() {
+    return players;
 }
 
 function randomInt(low, high) {

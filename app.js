@@ -34,7 +34,7 @@ var mobs = [];
 
 io.sockets.on('connection', onSocketConnection);
 
-/* NEW CONNECTIONS */
+/* CONNECTIONS */
 
 function onSocketConnection(client) {
     connections.push(client.id);
@@ -43,7 +43,9 @@ function onSocketConnection(client) {
     client.on('disconnect', onClientDisconnect);
     client.on('new player', onNewPlayer);
     client.on('move player', onMovePlayer);
+    client.on('new mob', onNewMob);
     client.on('move mob', onMoveMob);
+    client.on('remove all mobs', onRemoveAllMobs);
 }
 
 function onClientDisconnect() {
@@ -51,12 +53,16 @@ function onClientDisconnect() {
     console.log("Disconnect %s, total: %s", this.id, connections.length);
 
     var removePlayer = playerById(this.id);
+
+    if (!removePlayer)
+        return;
+    
     players.splice(players.indexOf(removePlayer), 1);
 
     this.broadcast.emit('remove player', {id: this.id});
 }
 
-/* NEW PLAYERS */
+/* PLAYERS */
 
 function onNewPlayer(data) {
     var newPlayer = new Player(data.x, data.y);
@@ -84,16 +90,18 @@ function onNewPlayer(data) {
 function onMovePlayer(data) {
     var movePlayer = playerById(this.id);
 
+    if (!movePlayer)
+        return;
+
     movePlayer.setX(data.x);
     movePlayer.setY(data.y);
 
     this.broadcast.emit('move player', {id: movePlayer.id, x: movePlayer.getX(), y: movePlayer.getY()});
 }
 
-/* NEW MOBS */
+/* MOBS */
 
 function onNewMob(data) {
-    console.log("servernewmob");
     var newMob = new ServerMob(data.x, data.y);
     newMob.id = mobs.length + "";
 
@@ -106,11 +114,19 @@ function onNewMob(data) {
 function onMoveMob(data) {
     var moveMob = mobById(data.id);
 
+    if (!moveMob)
+        return;
+
     moveMob.setX(data.x);
     moveMob.setY(data.y);
 
     // send new mob data to other clients
     this.broadcast.emit('move mob', {id: data.id, x: moveMob.getX(), y: moveMob.getY()});
+}
+
+function onRemoveAllMobs() {
+    io.sockets.emit('remove all mobs');
+    mobs = [];
 }
 
 /* HELPER FUNCTIONS */

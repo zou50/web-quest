@@ -1,7 +1,7 @@
 var Boot = {};
 
 Boot.preload = function() {
-
+    
 }
 
 Boot.create = function() {

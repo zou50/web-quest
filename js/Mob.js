@@ -33,16 +33,21 @@ Mob.prototype.followPlayer = function() {
     var player = Game.getPlayer();
     game.physics.arcade.collide(this.sprite, player);
 
+    let distance = game.physics.arcade.distanceBetween(this.sprite, player);
+
     // has other target
-    if (this.target && this.target != player)
-        return;
+    if (this.target && this.target != player) {
+        // check if target is closer
+        let distanceT = game.physics.arcade.distanceBetween(this.sprite, this.target);
+        if (distanceT < distance)
+            return;
+    }
 
     this.target = player;
-    let distance = game.physics.arcade.distanceBetween(this.sprite, player);
     if (distance < 80) {
         if (distance < 23) return;
         console.log("following");
-        game.physics.arcade.moveToObject(this.sprite, player, 45);
+        game.physics.arcade.moveToObject(this.sprite, this.target, 45);
     }
     else {
         this.target = null;
