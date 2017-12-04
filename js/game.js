@@ -17,12 +17,18 @@ Game.create = function() {
 
     // camera settings
     this.game.camera.setSize(400, 320);
+	
+	npcs = this.game.add.group();
+	npcs.enableBody = true;
+	var npc = npcs.create(300,176,'player');
 
     // input
     this.cursors = this.game.input.keyboard.createCursorKeys();
 
     // client
     Client.askNewPlayer();
+	
+	
 }
 
 Game.update = function() {
