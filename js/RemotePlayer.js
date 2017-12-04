@@ -1,25 +1,23 @@
-var RemotePlayer = function (index, game, player, startX, startY) {
+var RemotePlayer = function (index, game, sprite, startX, startY) {
     var x = startX;
     var y = startY;
 
     this.game = game;
-    this.health = 3;
-    this.player = player;
-    this.alive = true;
+    this.sprite = sprite;
 
-    this.player = game.add.sprite(x, y, 'characters', sprites["white"]);
+    this.sprite = game.add.sprite(x, y, 'characters', sprites["white"]);
+    this.sprite.name = index.toString();
+    this.sprite.anchor.setTo(0.5, 0.5);
 
-    this.player.name = index.toString();
-    game.physics.enable(this.player, Phaser.Physics.ARCADE);
-    this.player.body.immovable = true;
-    this.player.body.collideWorldBounds = true;
+    // body
+    game.physics.enable(this.sprite, Phaser.Physics.ARCADE);
+    this.sprite.body.immovable = true;
+    this.sprite.body.collideWorldBounds = true;
 
     this.lastPosition = { x: x, y: y }
 }
 
 RemotePlayer.prototype.update = function () {
-    this.lastPosition.x = this.player.x;
-    this.lastPosition.y = this.player.y;
+    this.lastPosition.x = this.sprite.x;
+    this.lastPosition.y = this.sprite.y;
 }
-
-window.RemotePlayer = RemotePlayer;

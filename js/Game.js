@@ -1,5 +1,6 @@
 var Game = {};
 var timer;
+
 Game.create = function() {
     socket = io.connect();
 
@@ -23,62 +24,84 @@ Game.create = function() {
     // other players
     players = [];
 
+    // baddies
+    mobs = [];
+
     // input
     cursors = game.input.keyboard.createCursorKeys();
-	keys = game.input.keyboard.addKeys({'action': Phaser.KeyCode.Z, 'cancel': Phaser.KeyCode.X, 'item': Phaser.KeyCode.A})
+	keys = game.input.keyboard.addKeys({
+        'action': Phaser.KeyCode.Z,
+        'cancel': Phaser.KeyCode.X,
+        'item': Phaser.KeyCode.A
+    });
 	
 	//On attack press
 	keys.action.onDown.add(attack,this);
-	//keys.action.onUp.add(stopAtk,this);	
+	//keys.action.onUp.add(stopAtk,this);
  	
-    // player
+    // client player
     player = game.add.sprite(randomInt(0, 200), randomInt(0, 200), 'characters', sprites["white"]);
     game.physics.arcade.enable(player);
     player.body.collideWorldBounds = true;
     player.body.bounce.setTo(1, 1);
+    player.anchor.setTo(0.5, 0.5);
+
     game.camera.follow(player);
 
     weapon = game.add.sprite(player.x + 11, player.y, 'characters', sprites["battleaxe"]);
+    weapon.anchor.setTo(0.5, 0.5);
 
-    // Client.newPlayer(player.body);
     setEventHandlers();
 	timer.start();
-
 }
 
 var setEventHandlers = function() {
     // Socket connection successful
-    socket.on('connect', Game.onSocketConnected)
+    socket.on('connect', Game.onSocketConnected);
 
     // Socket disconnection
-    socket.on('disconnect', Game.onSocketDisconnect)
+    socket.on('disconnect', Game.onSocketDisconnect);
 
     // New player message received
-    socket.on('new player', Game.onNewPlayer)
+    socket.on('new player', Game.onNewPlayer);
 
     // Player move message received
-    socket.on('move player', Game.onMovePlayer)
+    socket.on('move player', Game.onMovePlayer);
 
     // Player removed message received
-    socket.on('remove player', Game.onRemovePlayer)
+    socket.on('remove player', Game.onRemovePlayer);
+
+    // New mob message received
+    socket.on('new mob', Game.onNewMob);
+
+    // Move mob messages received
+    socket.on('move mob', Game.onMoveMob);
 }
 
 Game.update = function() {
     game.physics.arcade.collide(player, blockedLayer);
     for (var i = 0; i < players.length; i++) {
-        if (players[i].alive) {
+        if (players[i].sprite.alive) {
             players[i].update();
-            game.physics.arcade.collide(player, players[i].player);
+            game.physics.arcade.collide(player, players[i].sprite);
+        }
+    }
+    for (var i = 0; i < mobs.length; i++) {
+        if (mobs[i].sprite.alive) {
+            mobs[i].update();
+            game.physics.arcade.collide(mobs[i].sprite, blockedLayer);
+            if (mobs[i].target) {
+                socket.emit('move mob', {id: mobs[i].sprite.name, x: mobs[i].sprite.x, y: mobs[i].sprite.y});
+            }
         }
     }
 
     weapon.x = player.x + 11;
     weapon.y = player.y;
 
+    playerSpeed = 65;
     player.body.velocity.x = 0;
     player.body.velocity.y = 0;
-
-    playerSpeed = 65;
 
     if (cursors.up.isDown)
         player.body.velocity.y -= playerSpeed;
@@ -113,22 +136,48 @@ Game.onNewPlayer = function(data) {
 }
 
 Game.onMovePlayer = function(data) {
-    console.log("move");
     var movePlayer = playerById(data.id);
-    movePlayer.player.x = data.x;
-    movePlayer.player.y = data.y;
+
+    movePlayer.sprite.x = data.x;
+    movePlayer.sprite.y = data.y;
 }
 
 Game.onRemovePlayer = function(data) {
-    var removed = playerById(data.id);
+    var removePlayer = playerById(data.id);
 
-    removed.player.kill();
+    removePlayer.sprite.kill();
 
-    players.splice(players.indexOf(removed), 1);
+    players.splice(players.indexOf(removePlayer), 1);
+}
+
+Game.onNewMob = function(data) {
+    console.log("New mob");
+
+    mobs.push(new Mob(data.id, game, data.x, data.y));
+}
+
+Game.onMoveMob = function(data) {
+    var moveMob = mobById(data.id);
+
+    moveMob.sprite.x = data.x;
+    moveMob.sprite.y = data.y;
+}
+
+Game.onRemoveMob = function(data) {
+    var removeMob = mobById(data.id);
+
+    removeMob.sprite.kill();
+
+    mobs.splice(players.indexOf(removeMob), 1);
+}
+
+Game.getPlayer = function() {
+    return player;
 }
 
 function attack() {
     slashfx = game.add.sprite(player.x+15,player.y,'slash');
+    slashfx.anchor.setTo(0.5, 0.5);
 	timer.add(125,stopAtk,this);
 }
 
@@ -142,8 +191,16 @@ function randomInt(low, high) {
 
 function playerById(id) {
     for (var i = 0; i < players.length; i++) {
-        if (players[i].player.name === id)
+        if (players[i].sprite.name === id)
             return players[i];
+    }
+    return false;
+}
+
+function mobById(id) {
+    for (var i = 0; i < mobs.length; i++) {
+        if (mobs[i].sprite.name === id)
+            return mobs[i];
     }
     return false;
 }

@@ -8,6 +8,7 @@ var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 
 var Player = require('./js/Player');
+var ServerMob = require('./js/ServerMob');
 
 // path handling
 
@@ -25,13 +26,15 @@ server.listen(process.env.PORT || 3000, function() {
 });
 
 // connections
-
 var connections = [];
-var players = [];
 
-server.lastPlayerID = 0;
+// objects
+var players = [];
+var mobs = [];
 
 io.sockets.on('connection', onSocketConnection);
+
+/* NEW CONNECTIONS */
 
 function onSocketConnection(client) {
     connections.push(client.id);
@@ -40,9 +43,11 @@ function onSocketConnection(client) {
     client.on('disconnect', onClientDisconnect);
     client.on('new player', onNewPlayer);
     client.on('move player', onMovePlayer);
+    client.on('move mob', onMoveMob);
 }
 
 function onClientDisconnect() {
+    connections.splice(connections.indexOf(this.id), 1);
     console.log("Disconnect %s, total: %s", this.id, connections.length);
 
     var removePlayer = playerById(this.id);
@@ -51,16 +56,27 @@ function onClientDisconnect() {
     this.broadcast.emit('remove player', {id: this.id});
 }
 
+/* NEW PLAYERS */
+
 function onNewPlayer(data) {
     var newPlayer = new Player(data.x, data.y);
     newPlayer.id = this.id;
 
+    // notify others of self
     this.broadcast.emit('new player', {id: newPlayer.id, x: newPlayer.getX(), y: newPlayer.getY()});
 
+    // send other players to self
     for (var i = 0; i < players.length; i++) {
         var existingPlayer = players[i];
         this.emit('new player', {id: existingPlayer.id, x: existingPlayer.getX(), y: existingPlayer.getY()});
     }
+    // send server mobs to self
+    for (var i = 0; i < mobs.length; i++) {
+        var existingMob = mobs[i];
+        this.emit('new mob', {id: existingMob.id, x: existingMob.getX(), y: existingMob.getY()});
+    }
+
+    onNewMob({x: randomInt(0, 50), y: randomInt(0, 50)});
 
     players.push(newPlayer);
 }
@@ -74,10 +90,47 @@ function onMovePlayer(data) {
     this.broadcast.emit('move player', {id: movePlayer.id, x: movePlayer.getX(), y: movePlayer.getY()});
 }
 
+/* NEW MOBS */
+
+function onNewMob(data) {
+    console.log("servernewmob");
+    var newMob = new ServerMob(data.x, data.y);
+    newMob.id = mobs.length + "";
+
+    // send new mob to all clients
+    io.sockets.emit('new mob', {id: newMob.id, x: newMob.getX(), y: newMob.getY()});
+
+    mobs.push(newMob);
+}
+
+function onMoveMob(data) {
+    var moveMob = mobById(data.id);
+
+    moveMob.setX(data.x);
+    moveMob.setY(data.y);
+
+    // send new mob data to other clients
+    this.broadcast.emit('move mob', {id: data.id, x: moveMob.getX(), y: moveMob.getY()});
+}
+
+/* HELPER FUNCTIONS */
+
+function randomInt(low, high) {
+    return Math.floor(Math.random() * (high - low) + low);
+}
+
 function playerById(id) {
     for (var i = 0; i < players.length; i++) {
         if (players[i].id === id)
             return players[i];
+    }
+    return false;
+}
+
+function mobById(id) {
+    for (var i = 0; i < mobs.length; i++) {
+        if (mobs[i].id === id)
+            return mobs[i];
     }
     return false;
 }
