@@ -27,6 +27,9 @@ Game.create = function() {
 
     // input
     cursors = game.input.keyboard.createCursorKeys();
+	keys = game.input.keyboard.addKeys({'action': Phaser.KeyCode.Z, 'cancel': Phaser.KeyCode.X, 'item': Phaser.KeyCode.A})
+	keys.action.onDown.add(attack,this);
+	keys.action.onUp.add(stopAtk,this);
 
     // player
     player = game.add.sprite(randomInt(0, 200), randomInt(0, 200), 'player');
@@ -107,6 +110,14 @@ Game.onRemovePlayer = function(data) {
     removed.player.kill();
 
     players.splice(players.indexOf(removed), 1);
+}
+
+function attack() {
+    slashfx = game.add.sprite(0,0,'slash');
+}
+
+function stopAtk() {
+    slashfx.kill();
 }
 
 function randomInt(low, high) {
