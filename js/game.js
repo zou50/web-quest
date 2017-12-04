@@ -30,7 +30,13 @@ Game.create = function() {
 	keys = game.input.keyboard.addKeys({'action': Phaser.KeyCode.Z, 'cancel': Phaser.KeyCode.X, 'item': Phaser.KeyCode.A})
 	keys.action.onDown.add(attack,this);
 	keys.action.onUp.add(stopAtk,this);
+	
+	//Spritesheet example on adding a sprite, 	0-624, 636 = looped
 
+	npc1 = game.add.sprite(0,0,'characters', 0);
+	npc2 = game.add.sprite(0,16,'characters', 1);
+	weapon = game.add.sprite(0,32,'characters', 624);
+	
     // player
     player = game.add.sprite(randomInt(0, 200), randomInt(0, 200), 'player');
     game.physics.arcade.enable(player);
