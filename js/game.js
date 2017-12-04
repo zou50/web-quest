@@ -33,9 +33,10 @@ Game.create = function() {
 	
 	//Spritesheet example on adding a sprite, 	0-624, 636 = looped
 
-	npc1 = game.add.sprite(0,0,'characters', 0);
-	npc2 = game.add.sprite(0,16,'characters', 1);
-	weapon = game.add.sprite(0,32,'characters', 624);
+	npc1 = game.add.sprite(0,0,'characters', sprites["white"]);
+	npc2 = game.add.sprite(0,16,'characters', sprites["white_open"]);
+	weapon = game.add.sprite(0,32,'characters', sprites["BLAAAACK"]);
+    game.add.sprite(0, 48, 'characters', 537);
 	
     // player
     player = game.add.sprite(randomInt(0, 200), randomInt(0, 200), 'player');
