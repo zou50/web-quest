@@ -1,29 +1,25 @@
-var WebQuest = WebQuest || {};
+var Boot = {};
 
-WebQuest.Boot = function() {};
+Boot.preload = function() {
 
-WebQuest.Boot.prototype = {
-    preload: function() {
-        // loading screen
-        // this.load.image();
-    },
-    create: function() {
-        // black background
-        this.game.stage.backgroundColor = "#000";
+}
 
-        // scaling options
-        this.game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
-        this.game.scale.setUserScale(2, 2);
-        this.game.renderer.renderSession.roundPixels = true;
-        Phaser.Canvas.setImageRenderingCrisp(this.game.canvas);
+Boot.create = function() {
+    // black background
+    this.game.stage.backgroundColor = "#000";
 
-        // center
-        this.game.scale.pageAlignHorizontally = true;
-        this.game.scale.pageAlignVertically = true;
+    // scaling options
+    this.game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
+    this.game.scale.setUserScale(2, 2);
+    this.game.renderer.renderSession.roundPixels = true;
+    Phaser.Canvas.setImageRenderingCrisp(this.game.canvas);
 
-        // physics
-        this.game.physics.startSystem(Phaser.Physics.ARCADE);
+    // center
+    this.game.scale.pageAlignHorizontally = true;
+    this.game.scale.pageAlignVertically = true;
 
-        this.state.start('Preload');
-    }
+    // physics
+    this.game.physics.startSystem(Phaser.Physics.ARCADE);
+
+    this.state.start('Preload');
 }

@@ -9,9 +9,9 @@ WebQuest.game = new Phaser.Game(
 );
 
 // Game state
-WebQuest.game.state.add('Boot', WebQuest.Boot);
-WebQuest.game.state.add('Preload', WebQuest.Preload);
-WebQuest.game.state.add('Game', WebQuest.Game);
+WebQuest.game.state.add('Boot', Boot);
+WebQuest.game.state.add('Preload', Preload);
+WebQuest.game.state.add('Game', Game);
 
 // Start
 WebQuest.game.state.start('Boot');

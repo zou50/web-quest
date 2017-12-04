@@ -1,45 +1,75 @@
-var WebQuest = WebQuest || {};
+var Game = {};
 
-// title
-WebQuest.Game = function() {};
+Game.create = function() {
+    Game.playerMap = {};
 
-WebQuest.Game.prototype = {
-    create: function() {
-        this.map = this.game.add.tilemap('map1', 16, 16);
+    // initialize tiled map
+    this.map = this.game.add.tilemap('map1', 16, 16);
+    this.map.addTilesetImage('tiles', 'gameTiles');
 
-        this.map.addTilesetImage('tiles', 'gameTiles');
+    // create tiled map layers
+    this.backgroundLayer = this.map.createLayer(0);
+    this.foregroundLayer = this.map.createLayer(1);
+    this.blockedLayer = this.map.createLayer(2);
+    this.backgroundLayer.resizeWorld();
 
-        this.backgroundLayer = this.map.createLayer(0);
-        this.foregroundLayer = this.map.createLayer(1);
-        this.blockedLayer = this.map.createLayer(2);
-        this.map.setCollisionBetween(1, 2000, true, 'blockedLayer');
-        this.backgroundLayer.resizeWorld();
+    this.map.setCollisionBetween(1, 2000, true, 'blockedLayer');
 
-        this.player = this.game.add.sprite(0, 0, 'player');
+    // camera settings
+    this.game.camera.setSize(400, 320);
 
-        this.game.physics.arcade.enable(this.player);
-        this.game.camera.follow(this.player);
-        this.game.camera.setSize(400, 320);
+    // input
+    this.cursors = this.game.input.keyboard.createCursorKeys();
 
-        this.cursors = this.game.input.keyboard.createCursorKeys();
-    },
-    update: function() {
-        this.game.physics.arcade.collide(this.player, this.blockedLayer);
+    // client
+    Client.askNewPlayer();
+}
 
-        this.player.body.velocity.y = 0;
-        this.player.body.velocity.x = 0;
-
-        if (this.cursors.up.isDown)
-            this.player.body.velocity.y -= 100;
-        else if (this.cursors.down.isDown)
-            this.player.body.velocity.y += 100;
-        if (this.cursors.left.isDown)
-            this.player.body.velocity.x -= 100;
-        else if (this.cursors.right.isDown)
-            this.player.body.velocity.x += 100;
-    },
-    render: function() {
-        this.game.debug.cameraInfo(this.game.camera, 32, 32);
-        this.game.debug.spriteCoords(this.player, 32, 128);
+Game.update = function() {
+    // warning: will throw maximum call stack error (too many inputs)
+    if (this.cursors.up.isDown || this.cursors.down.isDown
+        || this.cursors.left.isDown || this.cursors.right.isDown) {
+        // Client.handleMove(this.cursors);
     }
 }
+
+Game.render = function() {
+    // this.game.debug.cameraInfo(this.game.camera, 32, 32);
+}
+
+Game.addNewPlayer = function(id, x, y) {
+    console.log("game new player");
+    Game.playerMap[id] = this.game.add.sprite(x, y, 'player');
+}
+
+Game.removePlayer = function(id) {
+    Game.playerMap[id].destroy();
+    delete Game.playerMap[id];
+}
+
+Game.movePlayer = function(id, cursors) {
+    var player = Game.playerMap[id];
+    player.body.velocity.y = 0;
+    player.body.velocity.x = 0;
+
+    if (cursors.up.isDown) {
+      player.body.velocity.y -= 50;
+    }
+    else if (cursors.down.isDown) {
+      player.body.velocity.y += 50;
+    }
+    if (cursors.left.isDown) {
+      player.body.velocity.x -= 50;
+    }
+    else if (cursors.right.isDown) {
+      player.body.velocity.x += 50;
+    }
+}
+
+
+
+
+
+
+
+
