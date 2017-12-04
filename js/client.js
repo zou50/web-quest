@@ -2,10 +2,7 @@ var Client = {};
 
 Client.socket = io.connect();
 
-Client.askNewPlayer = function() {
-    Client.socket.emit('newPlayer');
-}
-
+// Listen
 Client.socket.on('newPlayer', function(data) {
     Game.addNewPlayer(data.id, data.x, data.y);
 });
@@ -21,9 +18,15 @@ Client.socket.on('allPlayers', function(data) {
 });
 
 Client.socket.on('move', function(player) {
-    Game.movePlayer(player.id, player.cursors);
-})
+    Game.movePlayer(player.id, player.x, player.y);
+});
 
-Client.handleMove = function(cursors) {
-    Client.socket.emit('keyMove', cursors);
+// Functions
+Client.askNewPlayer = function() {
+    Client.socket.emit('newPlayer');
+}
+
+Client.handleMove = function(x, y) {
+    // console.log("move");
+    Client.socket.emit('keyMove', {x: x, y: y});
 }
