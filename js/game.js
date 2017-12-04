@@ -30,6 +30,7 @@ Game.create = function() {
     cursors = game.input.keyboard.createCursorKeys();
 	keys = game.input.keyboard.addKeys({'action': Phaser.KeyCode.Z, 'cancel': Phaser.KeyCode.X, 'item': Phaser.KeyCode.A})
 	keys.action.onDown.add(attack,this);
+	keys.action.onUp.add(stopAtk,this);
 
 
     // client
@@ -73,6 +74,12 @@ Game.movePlayer = function(id, x, y) {
     console.log(player.body.x);
 }
 
+function attack() {
+	slashfx = game.add.sprite(0,0,'slash');
+}
+function stopAtk() {
+	slashfx.kill();
+}
 
 
 
