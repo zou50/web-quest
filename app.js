@@ -37,7 +37,7 @@ io.sockets.on('connection', function(socket) {
         console.log("disconnect %s, total %s", socket.id, connections.length);
     });
 
-    socket.on('newPlayer', function() {
+    socket.on('newPlayer', function(player) {
         socket.player = {
             id: server.lastPlayerID++,
             x: randomInt(0, 200),
@@ -46,8 +46,9 @@ io.sockets.on('connection', function(socket) {
         socket.emit('allPlayers', getAllPlayers());
         socket.broadcast.emit('newPlayer', socket.player);
 
-        socket.on('keyMove', function(cursors) {
-            socket.player.cursors = cursors;
+        socket.on('keyMove', function(data) {
+            socket.player.x += data.x;
+            socket.player.y += data.y;
             io.emit('move', socket.player);
         });
 

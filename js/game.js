@@ -4,26 +4,30 @@ Game.create = function() {
     Game.playerMap = {};
 
     // initialize tiled map
-    this.map = this.game.add.tilemap('map1', 16, 16);
-    this.map.addTilesetImage('tiles', 'gameTiles');
+    map = game.add.tilemap('map1', 16, 16);
+    map.addTilesetImage('tiles', 'gameTiles');
 
     // create tiled map layers
-    this.backgroundLayer = this.map.createLayer(0);
-    this.foregroundLayer = this.map.createLayer(1);
-    this.blockedLayer = this.map.createLayer(2);
-    this.backgroundLayer.resizeWorld();
+    backgroundLayer = map.createLayer(0);
+    foregroundLayer = map.createLayer(1);
+    blockedLayer = map.createLayer(2);
+    backgroundLayer.resizeWorld();
 
-    this.map.setCollisionBetween(1, 2000, true, 'blockedLayer');
+    map.setCollisionBetween(1, 2000, true, 'blockedLayer');
 
     // camera settings
+
     this.game.camera.setSize(400, 320);
 	
 	npcs = this.game.add.group();
 	npcs.enableBody = true;
 	var npc = npcs.create(300,176,'player');
 
+    game.camera.setSize(400, 320);
+
+
     // input
-    this.cursors = this.game.input.keyboard.createCursorKeys();
+    cursors = game.input.keyboard.createCursorKeys();
 
     // client
     Client.askNewPlayer();
@@ -32,20 +36,26 @@ Game.create = function() {
 }
 
 Game.update = function() {
-    // warning: will throw maximum call stack error (too many inputs)
-    if (this.cursors.up.isDown || this.cursors.down.isDown
-        || this.cursors.left.isDown || this.cursors.right.isDown) {
-        // Client.handleMove(this.cursors);
-    }
+    if (cursors.up.isDown)
+        Client.handleMove(0, -1);
+    else if (cursors.down.isDown)
+        Client.handleMove(0, 1);
+    if (cursors.left.isDown)
+        Client.handleMove(-1, 0);
+    else if (cursors.right.isDown)
+        Client.handleMove(1, 0);
 }
 
 Game.render = function() {
-    // this.game.debug.cameraInfo(this.game.camera, 32, 32);
+    // game.debug.cameraInfo(game.camera, 32, 32);
 }
 
 Game.addNewPlayer = function(id, x, y) {
     console.log("game new player");
-    Game.playerMap[id] = this.game.add.sprite(x, y, 'player');
+    var newP = game.add.sprite(x, y, 'player');
+    Game.playerMap[id] = newP;
+    game.physics.arcade.enable(newP);
+    console.log(id);
 }
 
 Game.removePlayer = function(id) {
@@ -53,23 +63,11 @@ Game.removePlayer = function(id) {
     delete Game.playerMap[id];
 }
 
-Game.movePlayer = function(id, cursors) {
+Game.movePlayer = function(id, x, y) {
     var player = Game.playerMap[id];
-    player.body.velocity.y = 0;
-    player.body.velocity.x = 0;
-
-    if (cursors.up.isDown) {
-      player.body.velocity.y -= 50;
-    }
-    else if (cursors.down.isDown) {
-      player.body.velocity.y += 50;
-    }
-    if (cursors.left.isDown) {
-      player.body.velocity.x -= 50;
-    }
-    else if (cursors.right.isDown) {
-      player.body.velocity.x += 50;
-    }
+    player.x = x;
+    player.y = y;
+    console.log(player.body.x);
 }
 
 
