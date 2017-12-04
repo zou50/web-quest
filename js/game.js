@@ -18,10 +18,6 @@ Game.create = function() {
     // camera settings
     game.camera.setSize(400, 320);
 
-	// npcs = game.add.group();
-	// npcs.enableBody = true;
-	// var npc = npcs.create(300,176,'player');
-
     // other players
     players = [];
 
@@ -32,18 +28,18 @@ Game.create = function() {
 	keys.action.onUp.add(stopAtk,this);
 	
 	//Spritesheet example on adding a sprite, 	0-624, 636 = looped
-
-	npc1 = game.add.sprite(0,0,'characters', sprites["white"]);
-	npc2 = game.add.sprite(0,16,'characters', sprites["white_open"]);
-	weapon = game.add.sprite(0,32,'characters', sprites["BLAAAACK"]);
-    game.add.sprite(0, 48, 'characters', 537);
+	npc1 = game.add.sprite(0, 0,'characters', sprites["white"]);
+	npc2 = game.add.sprite(0, 16,'characters', sprites["white_open"]);
+	weapon = game.add.sprite(0, 32,'characters', sprites["BLAAAACK"]);
 	
     // player
-    player = game.add.sprite(randomInt(0, 200), randomInt(0, 200), 'player');
+    player = game.add.sprite(randomInt(0, 200), randomInt(0, 200), 'characters', sprites["white"]);
     game.physics.arcade.enable(player);
     player.body.collideWorldBounds = true;
     player.body.bounce.setTo(1, 1);
     game.camera.follow(player);
+
+    axe = game.add.sprite(player.x + 11, player.y, 'characters', 537);
 
     // Client.newPlayer(player.body);
     setEventHandlers();
@@ -68,18 +64,29 @@ var setEventHandlers = function() {
 
 Game.update = function() {
     game.physics.arcade.collide(player, blockedLayer);
+    for (var i = 0; i < players.length; i++) {
+        if (players[i].alive) {
+            players[i].update();
+            game.physics.arcade.collide(player, players[i].player);
+        }
+    }
+
+    axe.x = player.x + 11;
+    axe.y = player.y;
 
     player.body.velocity.x = 0;
     player.body.velocity.y = 0;
 
+    playerSpeed = 65;
+
     if (cursors.up.isDown)
-        player.body.velocity.y -= 50;
+        player.body.velocity.y -= playerSpeed;
     else if (cursors.down.isDown)
-        player.body.velocity.y += 50;
+        player.body.velocity.y += playerSpeed;
     if (cursors.left.isDown)
-        player.body.velocity.x -= 50;
+        player.body.velocity.x -= playerSpeed;
     else if (cursors.right.isDown)
-        player.body.velocity.x += 50;
+        player.body.velocity.x += playerSpeed;
 
     socket.emit('move player', { x: player.x, y: player.y });
 }

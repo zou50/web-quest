@@ -7,7 +7,7 @@ var RemotePlayer = function (index, game, player, startX, startY) {
     this.player = player;
     this.alive = true;
 
-    this.player = game.add.sprite(x, y, 'player');
+    this.player = game.add.sprite(x, y, 'characters', sprites["white"]);
 
     this.player.name = index.toString();
     game.physics.enable(this.player, Phaser.Physics.ARCADE);
