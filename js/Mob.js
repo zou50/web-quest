@@ -7,6 +7,10 @@ Mob = function(index, game, startX, startY) {
     this.sprite.name = index.toString();
     this.sprite.anchor.setTo(0.5, 0.5);
     this.weapon.anchor.setTo(0.5, 0.5);
+
+    // status
+    this.health = 3;
+    this.alive = true;
 	
     // currently chasing
     this.target = null;
@@ -15,13 +19,31 @@ Mob = function(index, game, startX, startY) {
     game.physics.enable(this.sprite, Phaser.Physics.ARCADE);
     this.sprite.body.immovable = true;
     this.sprite.body.collideWorldBounds = true;
+
+    this.healthText = game.make.text(-3, -20, this.health);
+    this.healthText.x = Math.floor(this.healthText.x);
+    this.healthText.y = Math.floor(this.healthText.y);
+    this.healthText.fontSize = 12;
+    this.sprite.addChild(this.healthText);
+
+    console.log(this.sprite.health);
 }
 
 Mob.prototype.update = function() {
+    this.healthText.text = this.health;
     this.sprite.body.velocity.x = 0;
     this.sprite.body.velocity.y = 0;
 
     this.followPlayer();
+}
+
+Mob.prototype.damage = function() {
+    this.health -= 1;
+    if (this.health <= 0) {
+        this.alive = false;
+        return true;
+    }
+    return false;
 }
 
 Mob.prototype.followPlayer = function() {
@@ -29,6 +51,9 @@ Mob.prototype.followPlayer = function() {
     game.physics.arcade.collide(this.sprite, player);
 
     let distance = game.physics.arcade.distanceBetween(this.sprite, player);
+
+    if (this.target && this.target != player)
+        return;
 
     if (distance < 80) {
         this.target = player;

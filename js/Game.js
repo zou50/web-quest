@@ -40,12 +40,7 @@ Game.create = function() {
 
 	//Scoreboard
 	defeatedEnemies = 0;
-	hud = game.add.text(game.camera.x, 50, "Defeated enemies: " +defeatedEnemies,{font: '12px Arial', fill: '#fff'});
-	hud.render = function() {
-		hud.x = game.camera.x;
-		hud.y = game.camera.y;
-		hud.text = "Defeated enemies: "+ defeatedEnemies;
-	}
+	
 	
     // input
     cursors = game.input.keyboard.createCursorKeys();
@@ -56,19 +51,34 @@ Game.create = function() {
         // admin
         'spawnG': Phaser.KeyCode.ONE,
         'spawnA': Phaser.KeyCode.TWO,
-        'removeAllZ': Phaser.KeyCode.W
+        'spawnI': Phaser.KeyCode.THREE,
+        'removeAllM': Phaser.KeyCode.Q,
+        'removeAllI': Phaser.KeyCode.W,
+        'debugMobs': Phaser.KeyCode.P,
+        'debugPlayer': Phaser.KeyCode.O
     });
     keys.spawnG.onDown.add(() => {
         socket.emit('new mob', {t: "Goblin", x: randomInt(0, 200), y: randomInt(0, 200)});
     });
     keys.spawnA.onDown.add(() => {
         socket.emit('new mob', {t: "Archer", x: randomInt(0, 200), y: randomInt(0, 200)});
-    })
-    keys.removeAllZ.onDown.add(() => {
+    });
+    keys.spawnI.onDown.add(() => {
+        socket.emit('new item', {x: randomInt(0, 200), y: randomInt(0, 200)});
+    });
+    keys.removeAllM.onDown.add(() => {
         socket.emit('remove all mobs');
     });
-
-    items.push(new Item(game, randomInt(0, 50), randomInt(0, 50)));
+    keys.removeAllI.onDown.add(() => {
+        socket.emit('remove all items');
+    });
+    keys.debugMobs.onDown.add(() => {
+        console.log(mobs);
+    });
+    keys.debugPlayer.onDown.add(() => {
+        console.log(player);
+        console.log(player.sprite.x, player.sprite.y);
+    });
  
     //On attack press
     keys.action.onDown.add(player.attack, player);
@@ -99,11 +109,23 @@ var setEventHandlers = function() {
     // Move mob message received
     socket.on('move mob', Game.onMoveMob);
 
+    // Damage mob message received
+    socket.on('damage mob', Game.onDamageMob);
+
     // Remove mob message received
     socket.on('remove mob', Game.onRemoveMob);
 
     // Remove all mobs message received
     socket.on('remove all mobs', Game.onRemoveAllMobs);
+
+    // New item message received
+    socket.on('new item', Game.onNewItem);
+
+    // Remove item message received
+    socket.on('remove item', Game.onRemoveItem);
+
+    // Remove all items message received
+    socket.on('remove all items', Game.onRemoveAllItems);
 }
 
 Game.update = function() {
@@ -116,22 +138,30 @@ Game.update = function() {
         }
     }
     for (var i = 0; i < mobs.length; i++) {
-        if (mobs[i].sprite.alive) {
+        if (mobs[i].alive) {
             if (game.physics.arcade.overlap(player.swing.children, mobs[i].sprite)) {
                 socket.emit('remove mob', {id: mobs[i].sprite.name});
                 mobs[i].destroy();
 				defeatedEnemies++;
-				
+
+                player.swing.children[0].kill();
+                var kill = mobs[i].damage();
+                if (kill) {
+                    socket.emit('remove mob', {id: mobs[i].sprite.name});
+                    defeatedEnemies++;
+                } else {
+                    socket.emit('damage mob', {id: mobs[i].sprite.name, hp: mobs[i].health});
+                }
+
             }
             game.physics.arcade.collide(mobs[i].sprite, blockedLayer);
             mobs[i].update();
-            if (mobs[i].target) {
+            if (mobs[i].target)
                 socket.emit('move mob', {id: mobs[i].sprite.name, x: mobs[i].sprite.x, y: mobs[i].sprite.y});
-            }
         }
     }
+    this.purgeMobs();
     player.update();
-	hud.render();
 
     if (cursors.up.isDown)
         player.moveUp();
@@ -142,11 +172,15 @@ Game.update = function() {
     else if (cursors.right.isDown)
         player.moveRight();
 
-    socket.emit('move player', { x: player.sprite.x, y: player.sprite.y });
+    socket.emit('move player', { 
+        x: player.sprite.x, y: player.sprite.y,
+        f: player.facing, d: player.direction,
+        a: player.isAttacking
+    });
 }
 
 Game.render = function() {
-    game.debug.text('Enemies defeated: ' + defeatedEnemies);
+    game.debug.text('Enemies defeated: ' + defeatedEnemies, 8, 16);
 }
 
 /* CONNECTIONS */
@@ -154,7 +188,11 @@ Game.render = function() {
 Game.onSocketConnected = function() {
     console.log("Connected");
 
-    socket.emit('new player', { x: player.sprite.x, y: player.sprite.y });
+    socket.emit('new player', {
+        x: player.sprite.x, y: player.sprite.y,
+        f: player.facing, d: player.direction,
+        a: player.isAttacking
+    });
 }
 
 Game.onSocketDisconnected = function() {
@@ -166,7 +204,12 @@ Game.onSocketDisconnected = function() {
 Game.onNewPlayer = function(data) {
     console.log("New player");
 
-    players.push(new RemotePlayer(data.id, game, player.sprite, data.x, data.y));
+    var newPlayer = new RemotePlayer(data.id, game, player.sprite, data.x, data.y);
+    newPlayer.facing = data.f;
+    newPlayer.direction = data.d;
+    newPlayer.isAttacking = data.a;
+
+    players.push(newPlayer);
 }
 
 Game.onMovePlayer = function(data) {
@@ -177,6 +220,9 @@ Game.onMovePlayer = function(data) {
 
     movePlayer.sprite.x = data.x;
     movePlayer.sprite.y = data.y;
+    movePlayer.facing = data.f;
+    movePlayer.direction = data.d;
+    movePlayer.isAttacking = data.a;
 }
 
 Game.onRemovePlayer = function(data) {
@@ -210,15 +256,31 @@ Game.onMoveMob = function(data) {
     moveMob.sprite.y = data.y;
 }
 
+Game.onDamageMob = function(data) {
+    var damageMob = mobById(data.id);
+
+    if (!damageMob)
+        return;
+
+    damageMob.health = data.hp;
+}
+
 Game.onRemoveMob = function(data) {
     var removeMob = mobById(data.id);
 
     if (!removeMob)
         return;
 
-    removeMob.destroy();
+    removeMob.alive = false;
+}
 
-    mobs.splice(players.indexOf(removeMob), 1);
+Game.purgeMobs = function() {
+    for (var i = mobs.length - 1; i >= 0; i--) {
+        if (!mobs[i].alive) {
+            mobs[i].destroy();
+            mobs.splice(i, 1);
+        }
+    }
 }
 
 Game.onRemoveAllMobs = function(data) {
@@ -230,6 +292,28 @@ Game.onRemoveAllMobs = function(data) {
 
 /* ITEMS */
 
+Game.onNewItem = function(data) {
+    console.log("New item");
+    items.push(new Item(data.id, game, data.x, data.y));
+}
+
+Game.onRemoveItem = function(data) {
+    var removeItem = itemById(data.id);
+
+    if (!removeItem)
+        return;
+
+    removeItem.destroy();
+
+    items.splice(items.indexOf(removeItem), 1);
+}
+
+Game.onRemoveAllItems = function(data) {
+    for (var i = 0; i < items.length; i++) {
+        items[i].destroy();
+    }
+    items = [];
+}
 
 /* HELPER FUNCTIONS */
 

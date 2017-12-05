@@ -9,6 +9,7 @@ var io = require('socket.io').listen(server);
 
 var ServerPlayer = require('./js/ServerPlayer');
 var ServerMob = require('./js/ServerMob');
+var ServerItem = require('./js/ServerItem');
 
 // path handling
 
@@ -31,6 +32,7 @@ var connections = [];
 // objects
 var players = [];
 var mobs = [];
+var items = [];
 
 io.sockets.on('connection', onSocketConnection);
 
@@ -45,8 +47,12 @@ function onSocketConnection(client) {
     client.on('move player', onMovePlayer);
     client.on('new mob', onNewMob);
     client.on('move mob', onMoveMob);
+    client.on('damage mob', onDamageMob);
     client.on('remove mob', onRemoveMob);
     client.on('remove all mobs', onRemoveAllMobs);
+    client.on('new item', onNewItem);
+    client.on('remove item', onRemoveItem);
+    client.on('remove all items', onRemoveAllItems);
 }
 
 function onClientDisconnect() {
@@ -68,19 +74,33 @@ function onClientDisconnect() {
 function onNewPlayer(data) {
     var newPlayer = new ServerPlayer(data.x, data.y);
     newPlayer.id = this.id;
+    newPlayer.f = data.f;
+    newPlayer.d = data.d;
+    newPlayer.a = data.a;
 
     // notify others of self
-    this.broadcast.emit('new player', {id: newPlayer.id, x: newPlayer.getX(), y: newPlayer.getY()});
+    this.broadcast.emit('new player', {
+        id: newPlayer.id, x: newPlayer.getX(), y: newPlayer.getY(),
+        f: newPlayer.f, d: newPlayer.d, a: newPlayer.a
+    });
 
     // send other players to self
     for (var i = 0; i < players.length; i++) {
         var existingPlayer = players[i];
-        this.emit('new player', {id: existingPlayer.id, x: existingPlayer.getX(), y: existingPlayer.getY()});
+        this.emit('new player', {
+            id: existingPlayer.id, x: existingPlayer.getX(), y: existingPlayer.getY(),
+            f: existingPlayer.f, d: existingPlayer.d, a: existingPlayer.a
+        });
     }
     // send server mobs to self
     for (var i = 0; i < mobs.length; i++) {
         var existingMob = mobs[i];
         this.emit('new mob', {id: existingMob.id, t: existingMob.type, x: existingMob.getX(), y: existingMob.getY()});
+    }
+    // send server items to self
+    for (var i = 0; i < items.length; i++) {
+        var existingItem = items[i];
+        this.emit('new item', {id: existingItem.id, x: existingItem.getX(), y: existingItem.getY()});
     }
 
     players.push(newPlayer);
@@ -94,8 +114,14 @@ function onMovePlayer(data) {
 
     movePlayer.setX(data.x);
     movePlayer.setY(data.y);
+    movePlayer.f = data.f;
+    movePlayer.d = data.d;
+    movePlayer.a = data.a;
 
-    this.broadcast.emit('move player', {id: movePlayer.id, x: movePlayer.getX(), y: movePlayer.getY()});
+    this.broadcast.emit('move player', {
+        id: movePlayer.id, x: movePlayer.getX(), y: movePlayer.getY(),
+        f: movePlayer.f, d: movePlayer.d, a: movePlayer.a
+    });
 }
 
 /* MOBS */
@@ -119,8 +145,16 @@ function onMoveMob(data) {
     moveMob.setX(data.x);
     moveMob.setY(data.y);
 
-    // send new mob data to other clients
     this.broadcast.emit('move mob', {id: data.id, x: moveMob.getX(), y: moveMob.getY()});
+}
+
+function onDamageMob(data) {
+    var damageMob = mobById(data.id);
+
+    if (!damageMob)
+        return;
+
+    this.broadcast.emit('damage mob', {id: data.id, hp: data.hp});
 }
 
 function onRemoveMob(data) {
@@ -137,6 +171,36 @@ function onRemoveMob(data) {
 function onRemoveAllMobs() {
     io.sockets.emit('remove all mobs');
     mobs = [];
+}
+
+/* ITEMS */
+
+function onNewItem(data) {
+    var newItem = new ServerItem(data.x, data.y);
+    newItem.id = items.length + "";
+
+    if (!newItem)
+        return;
+
+    io.sockets.emit('new item', {id: newItem.id, x: newItem.getX(), y: newItem.getY()});
+
+    items.push(newItem);
+}
+
+function onRemoveItem(data) {
+    var removeItem = itemById(item.id);
+
+    if (!removeItem)
+        return;
+
+    this.broadcast.emit('remove item', {id: removeItem.id});
+
+    items.splice(items.indexOf(removeItem), 1);
+}
+
+function onRemoveAllItems() {
+    io.sockets.emit('remove all items');
+    items = [];
 }
 
 /* HELPER FUNCTIONS */
@@ -157,6 +221,14 @@ function mobById(id) {
     for (var i = 0; i < mobs.length; i++) {
         if (mobs[i].id === id)
             return mobs[i];
+    }
+    return false;
+}
+
+function itemById(id) {
+    for (var i = 0; i < items.length; i++) {
+        if (items[i].id === id)
+            return items[i];
     }
     return false;
 }
