@@ -15,16 +15,11 @@ var Mob = function(index, game, startX, startY) {
     game.physics.enable(this.sprite, Phaser.Physics.ARCADE);
     this.sprite.body.immovable = true;
     this.sprite.body.collideWorldBounds = true;
-
-    this.lastPosition = {x: x, y: y};
 }
 
 Mob.prototype.update = function() {
     this.sprite.body.velocity.x = 0;
     this.sprite.body.velocity.y = 0;
-
-    this.lastPosition.x = this.sprite.x;
-    this.lastPosition.y = this.sprite.y;
 
     this.followPlayer();
 }
@@ -35,21 +30,12 @@ Mob.prototype.followPlayer = function() {
 
     let distance = game.physics.arcade.distanceBetween(this.sprite, player);
 
-    // has other target
-    if (this.target && this.target != player) {
-        // check if target is closer
-        let distanceT = game.physics.arcade.distanceBetween(this.sprite, this.target);
-        if (distanceT < distance)
-            return;
-    }
-
-    this.target = player;
     if (distance < 80) {
+        this.target = player;
         if (distance < 23) return;
         console.log("following");
         game.physics.arcade.moveToObject(this.sprite, this.target, 45);
-    }
-    else {
+    } else {
         this.target = null;
     }
 }

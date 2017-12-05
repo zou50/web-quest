@@ -1,6 +1,10 @@
 var Game = {};
 var timer;
 
+Game.preload = function() {
+    game.stage.disableVisibilityChange = true;
+}
+
 Game.create = function() {
     socket = io.connect();
 
@@ -157,7 +161,7 @@ Game.onRemovePlayer = function(data) {
     if (!removePlayer)
         return;
 
-    removePlayer.sprite.kill();
+    removePlayer.destroy();
 
     players.splice(players.indexOf(removePlayer), 1);
 }

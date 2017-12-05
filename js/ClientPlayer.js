@@ -20,9 +20,6 @@ ClientPlayer = function(game, startX, startY) {
     this.weapon.anchor.setTo(0.5, 0.5);
 }
 
-ClientPlayer.prototype = Object.create(Phaser.Sprite.prototype);
-ClientPlayer.prototype.constructor = ClientPlayer;
-
 ClientPlayer.prototype.update = function() {
     this.weapon.x = this.sprite.x + 11;
     this.weapon.y = this.sprite.y;

@@ -1,4 +1,4 @@
-var RemotePlayer = function(index, game, sprite, startX, startY) {
+RemotePlayer = function(index, game, sprite, startX, startY) {
     var x = startX;
     var y = startY;
 
@@ -7,17 +7,24 @@ var RemotePlayer = function(index, game, sprite, startX, startY) {
 
     this.sprite = game.add.sprite(x, y, 'characters', sprites["white"]);
     this.sprite.name = index.toString();
-    this.sprite.anchor.setTo(0.5, 0.5);
 
     // body
     game.physics.enable(this.sprite, Phaser.Physics.ARCADE);
     this.sprite.body.immovable = true;
     this.sprite.body.collideWorldBounds = true;
+    this.sprite.anchor.setTo(0.5, 0.5);
 
-    this.lastPosition = { x: x, y: y }
+    // equipment
+    this.weapon = game.add.sprite(this.sprite.x + 11, this.sprite.y, 'characters', sprites["battleaxe"]);
+    this.weapon.anchor.setTo(0.5, 0.5);
 }
 
 RemotePlayer.prototype.update = function() {
-    this.lastPosition.x = this.sprite.x;
-    this.lastPosition.y = this.sprite.y;
+    this.weapon.x = this.sprite.x + 11;
+    this.weapon.y = this.sprite.y;
+}
+
+RemotePlayer.prototype.destroy = function() {
+    this.sprite.kill();
+    this.weapon.kill();
 }
