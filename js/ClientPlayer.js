@@ -16,14 +16,11 @@ ClientPlayer = function(game, startX, startY) {
     this.isAttacking = false;
 
     // equipment
-    this.weapon = game.add.sprite(this.sprite.x + 11, this.sprite.y, 'characters', sprites["battleaxe"]);
+    this.weapon = this.sprite.addChild(game.make.sprite(11, 0, 'characters', sprites["battleaxe"]));
     this.weapon.anchor.setTo(0.5, 0.5);
 }
 
 ClientPlayer.prototype.update = function() {
-    this.weapon.x = this.sprite.x + 11;
-    this.weapon.y = this.sprite.y;
-
     this.sprite.body.velocity.x = 0;
     this.sprite.body.velocity.y = 0;
 }

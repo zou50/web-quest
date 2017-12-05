@@ -79,7 +79,7 @@ function onNewPlayer(data) {
     // send server mobs to self
     for (var i = 0; i < mobs.length; i++) {
         var existingMob = mobs[i];
-        this.emit('new mob', {id: existingMob.id, x: existingMob.getX(), y: existingMob.getY()});
+        this.emit('new mob', {id: existingMob.id, t: existingMob.type, x: existingMob.getX(), y: existingMob.getY()});
     }
 
     players.push(newPlayer);
@@ -100,11 +100,11 @@ function onMovePlayer(data) {
 /* MOBS */
 
 function onNewMob(data) {
-    var newMob = new ServerMob(data.x, data.y);
+    var newMob = new ServerMob(data.t, data.x, data.y);
     newMob.id = mobs.length + "";
 
     // send new mob to all clients
-    io.sockets.emit('new mob', {id: newMob.id, x: newMob.getX(), y: newMob.getY()});
+    io.sockets.emit('new mob', {id: newMob.id, t: data.t, x: newMob.getX(), y: newMob.getY()});
 
     mobs.push(newMob);
 }

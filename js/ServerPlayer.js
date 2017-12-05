@@ -1,4 +1,4 @@
-var ServerPlayer = function(startX, startY) {
+ServerPlayer = function(startX, startY) {
     var x = startX;
     var y = startY;
 

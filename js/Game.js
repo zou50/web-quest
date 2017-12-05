@@ -42,12 +42,16 @@ Game.create = function() {
         'cancel': Phaser.KeyCode.X,
         'item': Phaser.KeyCode.A,
         // admin
-        'spawnZ': Phaser.KeyCode.Q,
+        'spawnG': Phaser.KeyCode.ONE,
+        'spawnA': Phaser.KeyCode.TWO,
         'removeAllZ': Phaser.KeyCode.W
     });
-    keys.spawnZ.onDown.add(() => {
-        socket.emit('new mob', {x: randomInt(0, 200), y: randomInt(0, 200)});
+    keys.spawnG.onDown.add(() => {
+        socket.emit('new mob', {t: "Goblin", x: randomInt(0, 200), y: randomInt(0, 200)});
     });
+    keys.spawnA.onDown.add(() => {
+        socket.emit('new mob', {t: "Archer", x: randomInt(0, 200), y: randomInt(0, 200)});
+    })
     keys.removeAllZ.onDown.add(() => {
         socket.emit('remove all mobs');
     });
@@ -170,8 +174,10 @@ Game.onRemovePlayer = function(data) {
 
 Game.onNewMob = function(data) {
     console.log("New mob");
-
-    mobs.push(new Mob(data.id, game, data.x, data.y));
+    if (data.t === "Goblin")
+        mobs.push(new MobGoblin(data.id, game, data.x, data.y));
+    else if (data.t === "Archer")
+        mobs.push(new MobArcher(data.id, game, data.x, data.y));
 }
 
 Game.onMoveMob = function(data) {
@@ -190,14 +196,14 @@ Game.onRemoveMob = function(data) {
     if (!removeMob)
         return;
 
-    removeMob.sprite.kill();
+    removeMob.destroy();
 
     mobs.splice(players.indexOf(removeMob), 1);
 }
 
 Game.onRemoveAllMobs = function(data) {
     for (var i = 0; i < mobs.length; i++) {
-        mobs[i].sprite.kill();
+        mobs[i].destroy();
     }
     mobs = [];
 }

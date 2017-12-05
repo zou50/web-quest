@@ -1,12 +1,12 @@
-var Mob = function(index, game, startX, startY) {
+Mob = function(index, game, startX, startY) {
     var x = startX;
     var y = startY;
 
     this.game = game;
 
-    this.sprite = game.add.sprite(x, y, 'characters', sprites["green_open"]);
     this.sprite.name = index.toString();
     this.sprite.anchor.setTo(0.5, 0.5);
+    this.weapon.anchor.setTo(0.5, 0.5);
 
     // currently chasing
     this.target = null;
@@ -32,10 +32,17 @@ Mob.prototype.followPlayer = function() {
 
     if (distance < 80) {
         this.target = player;
-        if (distance < 23) return;
-        console.log("following");
+        if (distance < 23) 
+            return;
         game.physics.arcade.moveToObject(this.sprite, this.target, 45);
     } else {
         this.target = null;
     }
 }
+
+Mob.prototype.destroy = function() {
+    this.sprite.kill();
+    this.weapon.kill();
+}
+
+

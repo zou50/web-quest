@@ -1,6 +1,8 @@
-var ServerMob = function(startX, startY) {
+ServerMob = function(type, startX, startY) {
     var x = startX;
     var y = startY;
+
+    var type = type;
 
     var id;
 
@@ -25,6 +27,7 @@ var ServerMob = function(startX, startY) {
         getY: getY,
         setX: setX,
         setY: setY,
+        type: type,
         id: id
     }
 }
