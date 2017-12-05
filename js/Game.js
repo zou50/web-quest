@@ -7,7 +7,7 @@ Game.preload = function() {
 
 Game.create = function() {
     socket = io.connect();
-
+	
 	timer = game.time.create(false);
 
     // initialize tiled map
@@ -38,6 +38,8 @@ Game.create = function() {
     player = new ClientPlayer(game, randomInt(0, 200), randomInt(0, 200));;
     game.camera.follow(player.sprite);
 
+	defeatedEnemies = 0;
+	
     // input
     cursors = game.input.keyboard.createCursorKeys();
 	keys = game.input.keyboard.addKeys({
@@ -111,6 +113,7 @@ Game.update = function() {
             if (game.physics.arcade.overlap(player.swing.children, mobs[i].sprite)) {
                 socket.emit('remove mob', {id: mobs[i].sprite.name});
                 mobs[i].destroy();
+				defeatedEnemies++;
             }
             game.physics.arcade.collide(mobs[i].sprite, blockedLayer);
             mobs[i].update();
@@ -120,7 +123,7 @@ Game.update = function() {
         }
     }
     player.update();
-
+	
     if (cursors.up.isDown)
         player.moveUp();
     else if (cursors.down.isDown)
@@ -134,7 +137,7 @@ Game.update = function() {
 }
 
 Game.render = function() {
-    // game.debug.cameraInfo(game.camera, 32, 32);
+    game.debug.text('Enemies defeated: ' + defeatedEnemies);
 }
 
 /* CONNECTIONS */

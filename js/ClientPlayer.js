@@ -61,8 +61,8 @@ ClientPlayer.prototype.update = function() {
 ClientPlayer.prototype.attack = function() {
     if (this.isAttacking)
         return;
-    // all mobs
-	console.log(this.facing);
+   
+	//get player direction
 	xoff = 15;
 	yoff = 0;
 	rotation = 0;
@@ -88,6 +88,7 @@ ClientPlayer.prototype.attack = function() {
 			rotation = 90;
 			break;	
 	}
+	 // all mobs
 	var mobs = Game.getMobs();
     this.isAttacking = true;
 	
