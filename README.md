@@ -3,6 +3,7 @@
 ---
 
 Web Quest is a medieval mini-RPG with multiplayer functionality!
+
 Built for Purdue University | CS252 - Systems Programming - Fall 2017
 
 #### Team Members
