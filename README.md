@@ -6,6 +6,10 @@ Web Quest is a medieval mini-RPG with multiplayer functionality!
 
 Built for Purdue University | CS252 - Systems Programming - Fall 2017
 
+## Game
+
+#### [Play Here!](https://web-quest.herokuapp.com)
+
 #### Team Members
 Danny Zou
 
@@ -25,3 +29,8 @@ HTML5 | CSS3 | JS
 npm install
 ```
 
+## Assets / Tools
+
+##### [Kenney Assets](https://kenney.nl)
+
+##### [Tiled](http://www.mapeditor.org)
