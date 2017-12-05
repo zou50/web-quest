@@ -1,11 +1,12 @@
 RemotePlayer = function(index, game, sprite, startX, startY) {
     var x = startX;
     var y = startY;
+    this.facing = "right";
+    this.direction = 1;
 
     this.game = game;
     
-    this.sprite = sprite;
-    this.sprite = game.add.sprite(x, y, 'characters', sprites["white_male"]);
+    this.sprite = game.add.sprite(x, y, 'characters', sprite.frame);
     this.sprite.name = index.toString();
 
     // body
@@ -20,6 +21,7 @@ RemotePlayer = function(index, game, sprite, startX, startY) {
 }
 
 RemotePlayer.prototype.update = function() {
+    this.sprite.scale.x = this.direction;
     this.weapon.x = this.sprite.x + 11;
     this.weapon.y = this.sprite.y;
 }

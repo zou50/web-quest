@@ -3,7 +3,9 @@ ClientPlayer = function(game, startX, startY) {
     var y = startY;
 	this.facing = "right";
     this.direction = 1;
+
     this.game = game;
+    
     this.sprite = game.add.sprite(x, y, 'characters', sprites["white_male"]);
 
     // body
@@ -88,16 +90,20 @@ ClientPlayer.prototype.attack = function() {
 			xoff = 0;
 			yoff = 15;
 			rotation = 90;
-			break;	
+			break;
 	}
 	 // all mobs
 	var mobs = Game.getMobs();
     this.isAttacking = true;
-	
-    slashfx = this.swing.create(this.sprite.x + xoff, this.sprite.y + yoff, 'slash');
-	slashfx.angle = rotation;
+
+    slashfx = this.game.add.sprite(this.sprite.x + xoff, this.sprite.y + yoff, 'slash');
+    slashfx.angle = rotation;
     slashfx.anchor.setTo(0.5, 0.5);
-    slashfx.enableBody = true;
+
+    slashBody = this.swing.create(this.sprite.x + xoff, this.sprite.y + yoff);
+	slashBody.angle = rotation;
+    slashBody.anchor.setTo(0.5, 0.5);
+    slashBody.enableBody = true;
 
     this.weapon.pivot.setTo(-10, -3);
     this.weapon.angle = 90;
@@ -106,8 +112,9 @@ ClientPlayer.prototype.attack = function() {
 
 ClientPlayer.prototype.stopAtk = function() {
     this.isAttacking = false;
-    this.swing.remove(slashfx);
+    this.swing.remove(slashBody);
     slashfx.kill();
+    slashBody.kill();
     this.weapon.angle = 0;
     this.weapon.pivot.setTo(0, 0);
 }

@@ -51,7 +51,9 @@ Game.create = function() {
         'spawnA': Phaser.KeyCode.TWO,
         'spawnI': Phaser.KeyCode.THREE,
         'removeAllM': Phaser.KeyCode.Q,
-        'removeAllI': Phaser.KeyCode.W
+        'removeAllI': Phaser.KeyCode.W,
+        'debugMobs': Phaser.KeyCode.P,
+        'debugPlayer': Phaser.KeyCode.O
     });
     keys.spawnG.onDown.add(() => {
         socket.emit('new mob', {t: "Goblin", x: randomInt(0, 200), y: randomInt(0, 200)});
@@ -67,6 +69,13 @@ Game.create = function() {
     });
     keys.removeAllI.onDown.add(() => {
         socket.emit('remove all items');
+    });
+    keys.debugMobs.onDown.add(() => {
+        console.log(mobs);
+    });
+    keys.debugPlayer.onDown.add(() => {
+        console.log(player);
+        console.log(player.sprite.x, player.sprite.y);
     });
  
     //On attack press
@@ -124,19 +133,22 @@ Game.update = function() {
         }
     }
     for (var i = 0; i < mobs.length; i++) {
-        if (mobs[i].sprite.alive) {
+        if (mobs[i].alive) {
             if (game.physics.arcade.overlap(player.swing.children, mobs[i].sprite)) {
-                socket.emit('remove mob', {id: mobs[i].sprite.name});
-                mobs[i].destroy();
-				defeatedEnemies++;
+                player.swing.children[0].kill();
+                var kill = mobs[i].damage();
+                if (kill) {
+                    socket.emit('remove mob', {id: mobs[i].sprite.name});
+                    defeatedEnemies++;
+                }
             }
             game.physics.arcade.collide(mobs[i].sprite, blockedLayer);
             mobs[i].update();
-            if (mobs[i].target) {
+            if (mobs[i].target)
                 socket.emit('move mob', {id: mobs[i].sprite.name, x: mobs[i].sprite.x, y: mobs[i].sprite.y});
-            }
         }
     }
+    this.purgeMobs();
     player.update();
 	
     if (cursors.up.isDown)
@@ -152,7 +164,7 @@ Game.update = function() {
 }
 
 Game.render = function() {
-    game.debug.text('Enemies defeated: ' + defeatedEnemies);
+    game.debug.text('Enemies defeated: ' + defeatedEnemies, 32, 32);
 }
 
 /* CONNECTIONS */
@@ -171,7 +183,7 @@ Game.onSocketDisconnected = function() {
 
 Game.onNewPlayer = function(data) {
     console.log("New player");
-    console.log(player.sprite);
+
     players.push(new RemotePlayer(data.id, game, player.sprite, data.x, data.y));
 }
 
@@ -222,9 +234,16 @@ Game.onRemoveMob = function(data) {
     if (!removeMob)
         return;
 
-    removeMob.destroy();
+    removeMob.alive = false;
+}
 
-    mobs.splice(players.indexOf(removeMob), 1);
+Game.purgeMobs = function() {
+    for (var i = mobs.length - 1; i >= 0; i--) {
+        if (!mobs[i].alive) {
+            mobs[i].destroy();
+            mobs.splice(i, 1);
+        }
+    }
 }
 
 Game.onRemoveAllMobs = function(data) {

@@ -129,7 +129,6 @@ function onMoveMob(data) {
     moveMob.setX(data.x);
     moveMob.setY(data.y);
 
-    // send new mob data to other clients
     this.broadcast.emit('move mob', {id: data.id, x: moveMob.getX(), y: moveMob.getY()});
 }
 
@@ -139,7 +138,7 @@ function onRemoveMob(data) {
     if (!removeMob)
         return;
 
-    this.broadcast.emit('remove mob', {id: removeMob.id});
+    io.sockets.emit('remove mob', {id: removeMob.id});
 
     mobs.splice(mobs.indexOf(removeMob), 1);
 }
