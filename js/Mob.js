@@ -9,7 +9,7 @@ Mob = function(index, game, startX, startY) {
     this.weapon.anchor.setTo(0.5, 0.5);
 
     // status
-    this.health = 3;
+    this.health = game.rnd.between(1, 6);
     this.alive = true;
 	
     // currently chasing
@@ -25,8 +25,6 @@ Mob = function(index, game, startX, startY) {
     this.healthText.y = Math.floor(this.healthText.y);
     this.healthText.fontSize = 12;
     this.sprite.addChild(this.healthText);
-
-    console.log(this.sprite.health);
 }
 
 Mob.prototype.update = function() {

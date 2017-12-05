@@ -137,7 +137,7 @@ Game.update = function() {
     }
     for (var i = 0; i < mobs.length; i++) {
         if (mobs[i].alive) {
-            if (game.physics.arcade.overlap(player.swing.children, mobs[i].sprite)) {
+            if (game.physics.arcade.overlap(player.swing.children[0], mobs[i].sprite)) {
                 player.swing.children[0].kill();
                 var kill = mobs[i].damage();
                 if (kill) {

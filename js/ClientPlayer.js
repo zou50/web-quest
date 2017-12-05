@@ -72,7 +72,7 @@ ClientPlayer.prototype.attack = function() {
 	rotation = 0;
     switch(this.facing) {
 		case "right":
-			this.xoff = 16;
+			xoff = 15;
 			yoff = 0;
 			rotation = 0;
 			break;
