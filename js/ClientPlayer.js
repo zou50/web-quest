@@ -1,7 +1,7 @@
 ClientPlayer = function(game, startX, startY) {
     var x = startX;
     var y = startY;
-
+	this.facing = "right";
     this.game = game;
     this.sprite = game.add.sprite(x, y, 'characters', sprites["white_male"]);
 
@@ -62,9 +62,37 @@ ClientPlayer.prototype.attack = function() {
     if (this.isAttacking)
         return;
     // all mobs
-    var mobs = Game.getMobs();
+	console.log(this.facing);
+	xoff = 15;
+	yoff = 0;
+	rotation = 0;
+    switch(this.facing) {
+		case "right":
+			this.xoff = 16;
+			yoff = 0;
+			rotation = 0;
+			break;
+		case "left":
+			xoff = -15;
+			yoff = 0;
+			rotation = 180;
+			break;
+		case "up":
+			xoff = 0;
+			yoff = -15;
+			rotation = 270;
+			break;
+		case "down":
+			xoff = 0;
+			yoff = 15;
+			rotation = 90;
+			break;	
+	}
+	var mobs = Game.getMobs();
     this.isAttacking = true;
-    slashfx = this.swing.create(this.sprite.x + 15, this.sprite.y, 'slash');
+	
+    slashfx = this.swing.create(this.sprite.x + xoff, this.sprite.y + yoff, 'slash');
+	slashfx.angle = rotation;
     slashfx.anchor.setTo(0.5, 0.5);
     slashfx.enableBody = true;
 
@@ -85,16 +113,20 @@ ClientPlayer.prototype.stopAtk = function() {
 
 ClientPlayer.prototype.moveUp = function() {
     this.sprite.body.velocity.y -= this.speed;
+	this.facing = "up";
 }
 
 ClientPlayer.prototype.moveDown = function() {
     this.sprite.body.velocity.y += this.speed;
+	this.facing = "down";
 }
 
 ClientPlayer.prototype.moveLeft = function() {
     this.sprite.body.velocity.x -= this.speed;
+	this.facing = "left";
 }
 
 ClientPlayer.prototype.moveRight = function() {
     this.sprite.body.velocity.x += this.speed;
+	this.facing = "right";
 }

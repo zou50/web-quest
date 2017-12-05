@@ -7,7 +7,7 @@ Mob = function(index, game, startX, startY) {
     this.sprite.name = index.toString();
     this.sprite.anchor.setTo(0.5, 0.5);
     this.weapon.anchor.setTo(0.5, 0.5);
-
+	
     // currently chasing
     this.target = null;
 
@@ -44,5 +44,6 @@ Mob.prototype.destroy = function() {
     this.sprite.kill();
     this.weapon.kill();
 }
+
 
 
