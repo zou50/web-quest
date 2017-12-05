@@ -47,6 +47,7 @@ function onSocketConnection(client) {
     client.on('move player', onMovePlayer);
     client.on('new mob', onNewMob);
     client.on('move mob', onMoveMob);
+    client.on('damage mob', onDamageMob);
     client.on('remove mob', onRemoveMob);
     client.on('remove all mobs', onRemoveAllMobs);
     client.on('new item', onNewItem);
@@ -73,14 +74,23 @@ function onClientDisconnect() {
 function onNewPlayer(data) {
     var newPlayer = new ServerPlayer(data.x, data.y);
     newPlayer.id = this.id;
+    newPlayer.f = data.f;
+    newPlayer.d = data.d;
+    newPlayer.a = data.a;
 
     // notify others of self
-    this.broadcast.emit('new player', {id: newPlayer.id, x: newPlayer.getX(), y: newPlayer.getY()});
+    this.broadcast.emit('new player', {
+        id: newPlayer.id, x: newPlayer.getX(), y: newPlayer.getY(),
+        f: newPlayer.f, d: newPlayer.d, a: newPlayer.a
+    });
 
     // send other players to self
     for (var i = 0; i < players.length; i++) {
         var existingPlayer = players[i];
-        this.emit('new player', {id: existingPlayer.id, x: existingPlayer.getX(), y: existingPlayer.getY()});
+        this.emit('new player', {
+            id: existingPlayer.id, x: existingPlayer.getX(), y: existingPlayer.getY(),
+            f: existingPlayer.f, d: existingPlayer.d, a: existingPlayer.a
+        });
     }
     // send server mobs to self
     for (var i = 0; i < mobs.length; i++) {
@@ -104,8 +114,14 @@ function onMovePlayer(data) {
 
     movePlayer.setX(data.x);
     movePlayer.setY(data.y);
+    movePlayer.f = data.f;
+    movePlayer.d = data.d;
+    movePlayer.a = data.a;
 
-    this.broadcast.emit('move player', {id: movePlayer.id, x: movePlayer.getX(), y: movePlayer.getY()});
+    this.broadcast.emit('move player', {
+        id: movePlayer.id, x: movePlayer.getX(), y: movePlayer.getY(),
+        f: movePlayer.f, d: movePlayer.d, a: movePlayer.a
+    });
 }
 
 /* MOBS */
@@ -130,6 +146,15 @@ function onMoveMob(data) {
     moveMob.setY(data.y);
 
     this.broadcast.emit('move mob', {id: data.id, x: moveMob.getX(), y: moveMob.getY()});
+}
+
+function onDamageMob(data) {
+    var damageMob = mobById(data.id);
+
+    if (!damageMob)
+        return;
+
+    this.broadcast.emit('damage mob', {id: data.id, hp: data.hp});
 }
 
 function onRemoveMob(data) {

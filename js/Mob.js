@@ -20,10 +20,17 @@ Mob = function(index, game, startX, startY) {
     this.sprite.body.immovable = true;
     this.sprite.body.collideWorldBounds = true;
 
+    this.healthText = game.make.text(-3, -20, this.health);
+    this.healthText.x = Math.floor(this.healthText.x);
+    this.healthText.y = Math.floor(this.healthText.y);
+    this.healthText.fontSize = 12;
+    this.sprite.addChild(this.healthText);
+
     console.log(this.sprite.health);
 }
 
 Mob.prototype.update = function() {
+    this.healthText.text = this.health;
     this.sprite.body.velocity.x = 0;
     this.sprite.body.velocity.y = 0;
 

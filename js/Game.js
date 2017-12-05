@@ -107,6 +107,9 @@ var setEventHandlers = function() {
     // Move mob message received
     socket.on('move mob', Game.onMoveMob);
 
+    // Damage mob message received
+    socket.on('damage mob', Game.onDamageMob);
+
     // Remove mob message received
     socket.on('remove mob', Game.onRemoveMob);
 
@@ -140,6 +143,8 @@ Game.update = function() {
                 if (kill) {
                     socket.emit('remove mob', {id: mobs[i].sprite.name});
                     defeatedEnemies++;
+                } else {
+                    socket.emit('damage mob', {id: mobs[i].sprite.name, hp: mobs[i].health});
                 }
             }
             game.physics.arcade.collide(mobs[i].sprite, blockedLayer);
@@ -160,11 +165,15 @@ Game.update = function() {
     else if (cursors.right.isDown)
         player.moveRight();
 
-    socket.emit('move player', { x: player.sprite.x, y: player.sprite.y });
+    socket.emit('move player', { 
+        x: player.sprite.x, y: player.sprite.y,
+        f: player.facing, d: player.direction,
+        a: player.isAttacking
+    });
 }
 
 Game.render = function() {
-    game.debug.text('Enemies defeated: ' + defeatedEnemies, 32, 32);
+    game.debug.text('Enemies defeated: ' + defeatedEnemies, 8, 16);
 }
 
 /* CONNECTIONS */
@@ -172,7 +181,11 @@ Game.render = function() {
 Game.onSocketConnected = function() {
     console.log("Connected");
 
-    socket.emit('new player', { x: player.sprite.x, y: player.sprite.y });
+    socket.emit('new player', {
+        x: player.sprite.x, y: player.sprite.y,
+        f: player.facing, d: player.direction,
+        a: player.isAttacking
+    });
 }
 
 Game.onSocketDisconnected = function() {
@@ -184,7 +197,12 @@ Game.onSocketDisconnected = function() {
 Game.onNewPlayer = function(data) {
     console.log("New player");
 
-    players.push(new RemotePlayer(data.id, game, player.sprite, data.x, data.y));
+    var newPlayer = new RemotePlayer(data.id, game, player.sprite, data.x, data.y);
+    newPlayer.facing = data.f;
+    newPlayer.direction = data.d;
+    newPlayer.isAttacking = data.a;
+
+    players.push(newPlayer);
 }
 
 Game.onMovePlayer = function(data) {
@@ -195,6 +213,9 @@ Game.onMovePlayer = function(data) {
 
     movePlayer.sprite.x = data.x;
     movePlayer.sprite.y = data.y;
+    movePlayer.facing = data.f;
+    movePlayer.direction = data.d;
+    movePlayer.isAttacking = data.a;
 }
 
 Game.onRemovePlayer = function(data) {
@@ -226,6 +247,15 @@ Game.onMoveMob = function(data) {
 
     moveMob.sprite.x = data.x;
     moveMob.sprite.y = data.y;
+}
+
+Game.onDamageMob = function(data) {
+    var damageMob = mobById(data.id);
+
+    if (!damageMob)
+        return;
+
+    damageMob.health = data.hp;
 }
 
 Game.onRemoveMob = function(data) {
