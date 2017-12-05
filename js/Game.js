@@ -31,6 +31,9 @@ Game.create = function() {
     // baddies
     mobs = [];
 
+    // items on ground
+    items = [];
+
     // client player
     player = new ClientPlayer(game, randomInt(0, 200), randomInt(0, 200));;
     game.camera.follow(player.sprite);
@@ -55,6 +58,8 @@ Game.create = function() {
     keys.removeAllZ.onDown.add(() => {
         socket.emit('remove all mobs');
     });
+
+    items.push(new Item(game, randomInt(0, 50), randomInt(0, 50)));
  
     //On attack press
     keys.action.onDown.add(player.attack, player);
@@ -208,6 +213,9 @@ Game.onRemoveAllMobs = function(data) {
     mobs = [];
 }
 
+/* ITEMS */
+
+
 /* HELPER FUNCTIONS */
 
 Game.getPlayer = function() {
@@ -223,7 +231,7 @@ Game.getMobs = function() {
 }
 
 function randomInt(low, high) {
-    return Math.floor(Math.random() * (high - low) + low);
+    return game.rnd.between(low, high);
 }
 
 function playerById(id) {

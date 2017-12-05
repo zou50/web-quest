@@ -12,7 +12,7 @@ Preload.preload = function() {
     //     Phaser.Tilemap.TILED_JSON);
 
 	// 12x54 || 0-11, 0-53
-	game.load.spritesheet('characters','assets/spritesheets/characters.png', 16, 16, 636, 0, 1);
+	game.load.spritesheet('characters','assets/spritesheets/characters.png', 17, 17, 636, 0, 0);
 
     game.load.image('gameTiles', 'assets/spritesheets/world.png', 16, 16);
     game.load.image('player', 'assets/images/star.png');
@@ -51,6 +51,7 @@ function loadSprites() {
 	sprites["brown_shoes"] = 58;
 	sprites["white_shoes"] = 112;
 	sprites["beige_shoes"] = 166;
+    
     // tops
 	sprites["top1"] = 6;		
 	sprites["top2"] = 7;

@@ -5,7 +5,6 @@ RemotePlayer = function(index, game, sprite, startX, startY) {
     this.game = game;
     this.sprite = sprite;
 
-    this.sprite = game.add.sprite(x, y, 'characters', sprites["white"]);
     this.sprite.name = index.toString();
 
     // body
