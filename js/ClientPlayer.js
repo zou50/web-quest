@@ -30,6 +30,9 @@ ClientPlayer.prototype.update = function() {
 ClientPlayer.prototype.attack = function() {
     if (this.isAttacking)
         return;
+    // all mobs
+    var mobs = Game.getMobs();
+    
     this.isAttacking = true;
     slashfx = game.add.sprite(player.sprite.x + 15, player.sprite.y, 'slash');
     slashfx.anchor.setTo(0.5, 0.5);

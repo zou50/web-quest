@@ -218,6 +218,10 @@ Game.getPlayers = function() {
     return players;
 }
 
+Game.getMobs = function() {
+    return mobs;
+}
+
 function randomInt(low, high) {
     return Math.floor(Math.random() * (high - low) + low);
 }
