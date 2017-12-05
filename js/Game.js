@@ -174,6 +174,13 @@ Game.update = function() {
         if (game.physics.arcade.overlap(mobArrows[i].sprite, player.sprite)) {
             socket.emit('remove mob arrow', {id: mobArrows[i].sprite.name});
             var kill = player.damage();
+            if (kill) {
+                console.log("dead");
+                player.sprite.x = randomInt(0, 100);
+                player.sprite.y = randomInt(0, 100);
+                player.health = 20;
+                defeatedEnemies = 0;
+            }
         }
         else if (end) {
             socket.emit('remove mob arrow', {id: mobArrows[i].sprite.name});
@@ -276,9 +283,6 @@ Game.onMoveMob = function(data) {
 
     moveMob.sprite.x = data.x;
     moveMob.sprite.y = data.y;
-    var target = playerById(data.target);
-    console.log(target);
-    moveMob.target = target;
 }
 
 Game.onDamageMob = function(data) {
