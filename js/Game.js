@@ -60,10 +60,10 @@ Game.create = function() {
         'debugPlayer': Phaser.KeyCode.O
     });
     keys.spawnG.onDown.add(() => {
-        socket.emit('new mob', {t: "Goblin", x: randomInt(0, 200), y: randomInt(0, 200)});
+        socket.emit('new mob', {t: "Goblin", x: randomInt(275, 350), y: randomInt(190, 220)});
     });
     keys.spawnA.onDown.add(() => {
-        socket.emit('new mob', {t: "Archer", x: randomInt(0, 200), y: randomInt(0, 200)});
+        socket.emit('new mob', {t: "Archer", x: randomInt(275, 350), y: randomInt(190, 220)});
     });
     keys.spawnI.onDown.add(() => {
         socket.emit('new item', {x: randomInt(0, 200), y: randomInt(0, 200)});

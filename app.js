@@ -36,6 +36,36 @@ var mobs = [];
 var items = [];
 var mobArrows = [];
 
+// spawn points [x1, x2, y1, y2]
+var points = [
+    [275, 350, 190, 220], 
+    [81, 138, 408, 465], 
+    [478, 544, 400, 460]
+];
+
+setInterval(function() {
+    console.log("spawn mobs");
+    for (var i = 0; i < 15; i++) {
+        if (mobs.length > 15)
+            break;
+        let rng = randomInt(0, 20);
+        let t = rng > 3 ? "Goblin" : "Archer";
+        rng = randomInt(0, 60);
+        var spawnIndex;
+        if (rng >= 0 && rng <= 20)
+            spawnIndex = 0;
+        else if (rng > 20 && rng <= 40)
+            spawnIndex = 1;
+        else
+            spawnIndex = 2;
+        let p = points[spawnIndex];
+        let data = {
+            x: randomInt(p[0], p[1]), y: randomInt(p[2], p[3]), t: t
+        }
+        onNewMob(data);
+    }
+}, 5000);
+
 io.sockets.on('connection', onSocketConnection);
 
 /* CONNECTIONS */
