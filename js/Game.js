@@ -38,7 +38,14 @@ Game.create = function() {
     player = new ClientPlayer(game, randomInt(0, 200), randomInt(0, 200));;
     game.camera.follow(player.sprite);
 
+	//Scoreboard
 	defeatedEnemies = 0;
+	hud = game.add.text(game.camera.x, 50, "Defeated enemies: " +defeatedEnemies,{font: '12px Arial', fill: '#fff'});
+	hud.render = function() {
+		hud.x = game.camera.x;
+		hud.y = game.camera.y;
+		hud.text = "Defeated enemies: "+ defeatedEnemies;
+	}
 	
     // input
     cursors = game.input.keyboard.createCursorKeys();
@@ -114,6 +121,7 @@ Game.update = function() {
                 socket.emit('remove mob', {id: mobs[i].sprite.name});
                 mobs[i].destroy();
 				defeatedEnemies++;
+				
             }
             game.physics.arcade.collide(mobs[i].sprite, blockedLayer);
             mobs[i].update();
@@ -123,7 +131,8 @@ Game.update = function() {
         }
     }
     player.update();
-	
+	hud.render();
+
     if (cursors.up.isDown)
         player.moveUp();
     else if (cursors.down.isDown)
