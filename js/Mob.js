@@ -49,10 +49,10 @@ Mob.prototype.followPlayer = function() {
     var player = Game.getPlayer().sprite;
     game.physics.arcade.collide(this.sprite, player);
 
-    let distance = game.physics.arcade.distanceBetween(this.sprite, player);
-
     if (this.target && this.target != player)
         return;
+
+    let distance = game.physics.arcade.distanceBetween(this.sprite, player);
 
     if (distance < 80) {
         this.target = player;

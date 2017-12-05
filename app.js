@@ -10,6 +10,7 @@ var io = require('socket.io').listen(server);
 var ServerPlayer = require('./js/ServerPlayer');
 var ServerMob = require('./js/ServerMob');
 var ServerItem = require('./js/ServerItem');
+var ServerMobArrow = require('./js/ServerMobArrow');
 
 // path handling
 
@@ -33,6 +34,7 @@ var connections = [];
 var players = [];
 var mobs = [];
 var items = [];
+var mobArrows = [];
 
 io.sockets.on('connection', onSocketConnection);
 
@@ -43,16 +45,23 @@ function onSocketConnection(client) {
     console.log("New connection %s, total: %s", client.id, connections.length);
 
     client.on('disconnect', onClientDisconnect);
+    // players
     client.on('new player', onNewPlayer);
     client.on('move player', onMovePlayer);
+    // mobs
     client.on('new mob', onNewMob);
     client.on('move mob', onMoveMob);
     client.on('damage mob', onDamageMob);
     client.on('remove mob', onRemoveMob);
     client.on('remove all mobs', onRemoveAllMobs);
+    // items
     client.on('new item', onNewItem);
     client.on('remove item', onRemoveItem);
     client.on('remove all items', onRemoveAllItems);
+    // projectiles
+    client.on('new mob arrow', onNewMobArrow);
+    client.on('move mob arrow', onMoveMobArrow);
+    client.on('remove mob arrow', onRemoveMobArrow);
 }
 
 function onClientDisconnect() {
@@ -106,6 +115,12 @@ function onNewPlayer(data) {
         this.emit('new item', {id: existingItem.id, x: existingItem.getX(), y: existingItem.getY()});
     }
 
+    // send server projectiles to self
+    for (var i = 0; i < mobArrows.length; i++) {
+        var existingMobArrow = mobArrows[i];
+        //this.emit('new mob arrow', {id: existingMobArrow.id, x: existingMobArrow.getX(), y: existingMobArrow.getY()});
+    }
+
     players.push(newPlayer);
 }
 
@@ -131,7 +146,7 @@ function onMovePlayer(data) {
 
 function onNewMob(data) {
     var newMob = new ServerMob(data.t, data.x, data.y);
-    newMob.id = mobs.length + "";
+    newMob.id = randomInt(0, 20000) + "";
     newMob.hp = randomInt(1, 6);
 
     // send new mob to all clients
@@ -152,7 +167,9 @@ function onMoveMob(data) {
     moveMob.setX(data.x);
     moveMob.setY(data.y);
 
-    this.broadcast.emit('move mob', {id: data.id, x: moveMob.getX(), y: moveMob.getY()});
+    this.broadcast.emit('move mob', {
+        id: data.id, x: moveMob.getX(), y: moveMob.getY()
+    });
 }
 
 function onDamageMob(data) {
@@ -184,10 +201,7 @@ function onRemoveAllMobs() {
 
 function onNewItem(data) {
     var newItem = new ServerItem(data.x, data.y);
-    newItem.id = items.length + "";
-
-    if (!newItem)
-        return;
+    newItem.id = randomInt(0, 20000) + "";
 
     io.sockets.emit('new item', {id: newItem.id, x: newItem.getX(), y: newItem.getY()});
 
@@ -195,7 +209,7 @@ function onNewItem(data) {
 }
 
 function onRemoveItem(data) {
-    var removeItem = itemById(item.id);
+    var removeItem = itemById(data.id);
 
     if (!removeItem)
         return;
@@ -208,6 +222,40 @@ function onRemoveItem(data) {
 function onRemoveAllItems() {
     io.sockets.emit('remove all items');
     items = [];
+}
+
+/* PROJECTILES */
+
+function onNewMobArrow(data) {
+    var newMobArrow = new ServerMobArrow(data.x, data.y);
+    newMobArrow.id = randomInt(0, 20000) + "";
+
+    io.sockets.emit('new mob arrow', {
+        id: newMobArrow.id, target: data.target,
+        x: newMobArrow.getX(), y: newMobArrow.getY()
+    });
+
+    mobArrows.push(newMobArrow);
+}
+
+function onMoveMobArrow(data) {
+    var moveMobArrow = mobArrowById(data.id);
+
+    if (!moveMobArrow)
+        return;
+
+    this.broadcast.emit('move mob arrow', moveMobArrow);
+}
+
+function onRemoveMobArrow(data) {
+    var removeMobArrow = mobArrowById(data.id);
+
+    if (!removeMobArrow)
+        return;
+
+    io.sockets.emit('remove mob arrow', {id: removeMobArrow.id});
+
+    mobArrows.splice(mobArrows.indexOf(removeMobArrow), 1);
 }
 
 /* HELPER FUNCTIONS */
@@ -240,6 +288,13 @@ function itemById(id) {
     return false;
 }
 
+function mobArrowById(id) {
+    for (var i = 0; i < mobArrows.length; i++) {
+        if (mobArrows[i].id === id)
+            return mobArrows[i];
+    }
+    return false;
+}
 
 
 

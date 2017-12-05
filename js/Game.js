@@ -34,13 +34,15 @@ Game.create = function() {
     // items on ground
     items = [];
 
+    // enemy projectiles
+    mobArrows = [];
+
     // client player
     player = new ClientPlayer(game, randomInt(0, 200), randomInt(0, 200));;
     game.camera.follow(player.sprite);
 
 	//Scoreboard
 	defeatedEnemies = 0;
-	
 	
     // input
     cursors = game.input.keyboard.createCursorKeys();
@@ -126,6 +128,15 @@ var setEventHandlers = function() {
 
     // Remove all items message received
     socket.on('remove all items', Game.onRemoveAllItems);
+
+    // New mob arrow message received
+    socket.on('new mob arrow', Game.onNewMobArrow);
+
+    // Move mob arrow message received
+    socket.on('move mob arrow', Game.onMoveMobArrow);
+
+    // Remove mob arrow message received
+    socket.on('remove mob arrow', Game.onRemoveMobArrow);
 }
 
 Game.update = function() {
@@ -148,12 +159,26 @@ Game.update = function() {
                 } else {
                     socket.emit('damage mob', {id: mobs[i].sprite.name, hp: mobs[i].health});
                 }
-
             }
             game.physics.arcade.collide(mobs[i].sprite, blockedLayer);
             mobs[i].update();
-            if (mobs[i].target)
-                socket.emit('move mob', {id: mobs[i].sprite.name, x: mobs[i].sprite.x, y: mobs[i].sprite.y});
+            if (mobs[i].target) {
+                socket.emit('move mob', {
+                    id: mobs[i].sprite.name,
+                    x: mobs[i].sprite.x, y: mobs[i].sprite.y});
+            }
+        }
+    }
+    for (var i = 0; i < mobArrows.length; i++) {
+        end = mobArrows[i].update();
+        if (game.physics.arcade.overlap(mobArrows[i].sprite, player.sprite)) {
+            socket.emit('remove mob arrow', {id: mobArrows[i].sprite.name});
+            var kill = player.damage();
+        }
+        else if (end) {
+            socket.emit('remove mob arrow', {id: mobArrows[i].sprite.name});
+        } else {
+            socket.emit('move mob arrow', {x: mobArrows[i].spritex, y: mobArrows[i].spritey});
         }
     }
     this.purgeMobs();
@@ -251,6 +276,9 @@ Game.onMoveMob = function(data) {
 
     moveMob.sprite.x = data.x;
     moveMob.sprite.y = data.y;
+    var target = playerById(data.target);
+    console.log(target);
+    moveMob.target = target;
 }
 
 Game.onDamageMob = function(data) {
@@ -312,6 +340,38 @@ Game.onRemoveAllItems = function(data) {
     items = [];
 }
 
+/* PROJECTILES */
+
+Game.onNewMobArrow = function(data) {
+    var newMobArrow = new MobArrow(data.id, game, data.x, data.y, data.target);
+    mobArrows.push(newMobArrow);
+}
+
+Game.onMoveMobArrow = function(data) {
+    var moveMobArrow = mobArrowById(data.id);
+
+    if (!moveMobArrow)
+        return;
+
+    moveMobArrow.x = data.x;
+    moveMobArrow.y = data.y;
+}
+
+Game.onRemoveMobArrow = function(data) {
+    var removeMobArrow = mobArrowById(data.id);
+
+    if (!removeMobArrow)
+        return;
+
+    removeMobArrow.destroy();
+
+    mobArrows.splice(mobArrows.indexOf(removeMobArrow), 1);
+}
+
+Game.sendMobArrow = function(arrowInfo) {
+    socket.emit('new mob arrow', {x: arrowInfo.x, y: arrowInfo.y, target: arrowInfo.target});
+}
+
 /* HELPER FUNCTIONS */
 
 Game.getPlayer = function() {
@@ -324,6 +384,14 @@ Game.getPlayers = function() {
 
 Game.getMobs = function() {
     return mobs;
+}
+
+Game.getItems = function() {
+    return items;
+}
+
+Game.getMobArrows = function() {
+    return mobArrows;
 }
 
 function randomInt(low, high) {
@@ -342,6 +410,22 @@ function mobById(id) {
     for (var i = 0; i < mobs.length; i++) {
         if (mobs[i].sprite.name === id)
             return mobs[i];
+    }
+    return false;
+}
+
+function itemById(id) {
+    for (var i = 0; i < items.length; i++) {
+        if (items[i].sprite.name === id)
+            return items[i];
+    }
+    return false;
+}
+
+function mobArrowById(id) {
+    for (var i = 0; i < mobArrows.length; i++) {
+        if (mobArrows[i].sprite.name === id)
+            return mobArrows[i];
     }
     return false;
 }

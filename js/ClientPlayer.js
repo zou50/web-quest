@@ -8,15 +8,23 @@ ClientPlayer = function(game, startX, startY) {
     
     this.sprite = game.add.sprite(x, y, 'characters', sprites["white_male"]);
 
+    // status
+    this.speed = 65;
+    this.isAttacking = false;
+    this.health = 20;
+    this.alive = true;
+
     // body
     game.physics.enable(this.sprite, Phaser.Physics.ARCADE);
     this.sprite.body.collideWorldBounds = true;
     this.sprite.body.bounce.setTo(1, 1);
     this.sprite.anchor.setTo(0.5, 0.5);
 
-    // stats
-    this.speed = 65;
-    this.isAttacking = false;
+    this.healthText = game.add.text(this.sprite.x, this.sprite.y - 12, this.health);
+    this.healthText.anchor.setTo(0.5, 0.5);
+    this.healthText.x = Math.floor(this.healthText.x);
+    this.healthText.y = Math.floor(this.healthText.y);
+    this.healthText.fontSize = 12;
 
     // equipment
     // helmet        
@@ -55,9 +63,22 @@ ClientPlayer = function(game, startX, startY) {
 }
 
 ClientPlayer.prototype.update = function() {
+    this.healthText.text = this.health;
+    this.healthText.x = this.sprite.x;
+    this.healthText.y = this.sprite.y - 12;
+    
     this.sprite.scale.x = this.direction;
     this.sprite.body.velocity.x = 0;
     this.sprite.body.velocity.y = 0;
+}
+
+ClientPlayer.prototype.damage = function() {
+    this.health -= 1;
+    if (this.health <= 0) {
+        this.alive = false;
+        return true;
+    }
+    return false;
 }
 
 /* ACTIONS */
