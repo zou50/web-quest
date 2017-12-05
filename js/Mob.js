@@ -1,4 +1,4 @@
-Mob = function(index, game, startX, startY) {
+Mob = function(index, game, startX, startY, hp) {
     var x = startX;
     var y = startY;
 
@@ -9,7 +9,7 @@ Mob = function(index, game, startX, startY) {
     this.weapon.anchor.setTo(0.5, 0.5);
 
     // status
-    this.health = game.rnd.between(1, 6);
+    this.health = hp;
     this.alive = true;
 	
     // currently chasing
@@ -28,7 +28,8 @@ Mob = function(index, game, startX, startY) {
 }
 
 Mob.prototype.update = function() {
-    this.healthText.text = this.health;
+    if (this.health)
+        this.healthText.text = this.health;
     this.sprite.body.velocity.x = 0;
     this.sprite.body.velocity.y = 0;
 

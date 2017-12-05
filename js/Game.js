@@ -38,7 +38,9 @@ Game.create = function() {
     player = new ClientPlayer(game, randomInt(0, 200), randomInt(0, 200));;
     game.camera.follow(player.sprite);
 
+	//Scoreboard
 	defeatedEnemies = 0;
+	
 	
     // input
     cursors = game.input.keyboard.createCursorKeys();
@@ -146,6 +148,7 @@ Game.update = function() {
                 } else {
                     socket.emit('damage mob', {id: mobs[i].sprite.name, hp: mobs[i].health});
                 }
+
             }
             game.physics.arcade.collide(mobs[i].sprite, blockedLayer);
             mobs[i].update();
@@ -155,7 +158,7 @@ Game.update = function() {
     }
     this.purgeMobs();
     player.update();
-	
+
     if (cursors.up.isDown)
         player.moveUp();
     else if (cursors.down.isDown)
@@ -232,11 +235,12 @@ Game.onRemovePlayer = function(data) {
 /* MOBS */
 
 Game.onNewMob = function(data) {
+    console.log(data);
     console.log("New mob");
     if (data.t === "Goblin")
-        mobs.push(new MobGoblin(data.id, game, data.x, data.y));
+        mobs.push(new MobGoblin(data.id, game, data.x, data.y, data.hp));
     else if (data.t === "Archer")
-        mobs.push(new MobArcher(data.id, game, data.x, data.y));
+        mobs.push(new MobArcher(data.id, game, data.x, data.y, data.hp));
 }
 
 Game.onMoveMob = function(data) {
