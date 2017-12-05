@@ -49,7 +49,7 @@ setInterval(function() {
         if (mobs.length > 15)
             break;
         let rng = randomInt(0, 20);
-        let t = rng > 3 ? "Goblin" : "Archer";
+        let t = rng > 5 ? "Goblin" : "Archer";
         rng = randomInt(0, 60);
         var spawnIndex;
         if (rng >= 0 && rng <= 20)

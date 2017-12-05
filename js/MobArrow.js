@@ -24,7 +24,7 @@ MobArrow.prototype.update = function() {
         return true;
     }
 
-    game.physics.arcade.moveToObject(this.sprite, this.target, 150);
+    game.physics.arcade.moveToObject(this.sprite, this.target, 120);
 }
 
 MobArrow.prototype.destroy = function() {

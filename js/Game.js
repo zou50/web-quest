@@ -38,7 +38,7 @@ Game.create = function() {
     mobArrows = [];
 
     // client player
-    player = new ClientPlayer(game, randomInt(0, 200), randomInt(0, 200));;
+    player = new ClientPlayer(game, randomInt(20, 200), randomInt(20, 200));;
     game.camera.follow(player.sprite);
 
 	//Scoreboard
@@ -176,8 +176,8 @@ Game.update = function() {
             var kill = player.damage();
             if (kill) {
                 console.log("dead");
-                player.sprite.x = randomInt(0, 100);
-                player.sprite.y = randomInt(0, 100);
+                player.sprite.x = randomInt(50, 100);
+                player.sprite.y = randomInt(50, 100);
                 player.health = 20;
                 defeatedEnemies = 0;
             }

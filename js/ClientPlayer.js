@@ -13,6 +13,8 @@ ClientPlayer = function(game, startX, startY) {
     this.isAttacking = false;
     this.health = 20;
     this.alive = true;
+    this.nextHeal = 0;
+    this.healRate = 5000;
 
     // body
     game.physics.enable(this.sprite, Phaser.Physics.ARCADE);
@@ -63,6 +65,11 @@ ClientPlayer = function(game, startX, startY) {
 }
 
 ClientPlayer.prototype.update = function() {
+    if (game.time.now > this.nextHeal) {
+        this.nextHeal = game.time.now + this.healRate;
+        if (this.health < 20)
+            this.health += 1;
+    }
     this.healthText.text = this.health;
     this.healthText.x = this.sprite.x;
     this.healthText.y = this.sprite.y - 12;

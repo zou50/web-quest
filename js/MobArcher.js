@@ -5,7 +5,7 @@ MobArcher = function(index, game, startX, startY, hp) {
     Mob.call(this, index, game, startX, startY, hp);
 
     this.mobArrows = Game.getMobArrows();
-    this.fireRate = 1000;
+    this.fireRate = 1800;
     this.nextFire = 0;
 }
 
