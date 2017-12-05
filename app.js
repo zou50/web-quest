@@ -9,6 +9,7 @@ var io = require('socket.io').listen(server);
 
 var ServerPlayer = require('./js/ServerPlayer');
 var ServerMob = require('./js/ServerMob');
+var ServerItem = require('./js/ServerItem');
 
 // path handling
 
@@ -31,6 +32,7 @@ var connections = [];
 // objects
 var players = [];
 var mobs = [];
+var items = [];
 
 io.sockets.on('connection', onSocketConnection);
 
@@ -47,6 +49,9 @@ function onSocketConnection(client) {
     client.on('move mob', onMoveMob);
     client.on('remove mob', onRemoveMob);
     client.on('remove all mobs', onRemoveAllMobs);
+    client.on('new item', onNewItem);
+    client.on('remove item', onRemoveItem);
+    client.on('remove all items', onRemoveAllItems);
 }
 
 function onClientDisconnect() {
@@ -81,6 +86,11 @@ function onNewPlayer(data) {
     for (var i = 0; i < mobs.length; i++) {
         var existingMob = mobs[i];
         this.emit('new mob', {id: existingMob.id, t: existingMob.type, x: existingMob.getX(), y: existingMob.getY()});
+    }
+    // send server items to self
+    for (var i = 0; i < items.length; i++) {
+        var existingItem = items[i];
+        this.emit('new item', {id: existingItem.id, x: existingItem.getX(), y: existingItem.getY()});
     }
 
     players.push(newPlayer);
@@ -129,7 +139,7 @@ function onRemoveMob(data) {
     if (!removeMob)
         return;
 
-    io.sockets.emit('remove mob', {id: removeMob.id});
+    this.broadcast.emit('remove mob', {id: removeMob.id});
 
     mobs.splice(mobs.indexOf(removeMob), 1);
 }
@@ -137,6 +147,36 @@ function onRemoveMob(data) {
 function onRemoveAllMobs() {
     io.sockets.emit('remove all mobs');
     mobs = [];
+}
+
+/* ITEMS */
+
+function onNewItem(data) {
+    var newItem = new ServerItem(data.x, data.y);
+    newItem.id = items.length + "";
+
+    if (!newItem)
+        return;
+
+    io.sockets.emit('new item', {id: newItem.id, x: newItem.getX(), y: newItem.getY()});
+
+    items.push(newItem);
+}
+
+function onRemoveItem(data) {
+    var removeItem = itemById(item.id);
+
+    if (!removeItem)
+        return;
+
+    this.broadcast.emit('remove item', {id: removeItem.id});
+
+    items.splice(items.indexOf(removeItem), 1);
+}
+
+function onRemoveAllItems() {
+    io.sockets.emit('remove all items');
+    items = [];
 }
 
 /* HELPER FUNCTIONS */
@@ -157,6 +197,14 @@ function mobById(id) {
     for (var i = 0; i < mobs.length; i++) {
         if (mobs[i].id === id)
             return mobs[i];
+    }
+    return false;
+}
+
+function itemById(id) {
+    for (var i = 0; i < items.length; i++) {
+        if (items[i].id === id)
+            return items[i];
     }
     return false;
 }

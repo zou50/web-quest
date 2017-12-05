@@ -49,19 +49,25 @@ Game.create = function() {
         // admin
         'spawnG': Phaser.KeyCode.ONE,
         'spawnA': Phaser.KeyCode.TWO,
-        'removeAllZ': Phaser.KeyCode.W
+        'spawnI': Phaser.KeyCode.THREE,
+        'removeAllM': Phaser.KeyCode.Q,
+        'removeAllI': Phaser.KeyCode.W
     });
     keys.spawnG.onDown.add(() => {
         socket.emit('new mob', {t: "Goblin", x: randomInt(0, 200), y: randomInt(0, 200)});
     });
     keys.spawnA.onDown.add(() => {
         socket.emit('new mob', {t: "Archer", x: randomInt(0, 200), y: randomInt(0, 200)});
-    })
-    keys.removeAllZ.onDown.add(() => {
+    });
+    keys.spawnI.onDown.add(() => {
+        socket.emit('new item', {x: randomInt(0, 200), y: randomInt(0, 200)});
+    });
+    keys.removeAllM.onDown.add(() => {
         socket.emit('remove all mobs');
     });
-
-    items.push(new Item(game, randomInt(0, 50), randomInt(0, 50)));
+    keys.removeAllI.onDown.add(() => {
+        socket.emit('remove all items');
+    });
  
     //On attack press
     keys.action.onDown.add(player.attack, player);
@@ -97,6 +103,15 @@ var setEventHandlers = function() {
 
     // Remove all mobs message received
     socket.on('remove all mobs', Game.onRemoveAllMobs);
+
+    // New item message received
+    socket.on('new item', Game.onNewItem);
+
+    // Remove item message received
+    socket.on('remove item', Game.onRemoveItem);
+
+    // Remove all items message received
+    socket.on('remove all items', Game.onRemoveAllItems);
 }
 
 Game.update = function() {
@@ -156,7 +171,7 @@ Game.onSocketDisconnected = function() {
 
 Game.onNewPlayer = function(data) {
     console.log("New player");
-
+    console.log(player.sprite);
     players.push(new RemotePlayer(data.id, game, player.sprite, data.x, data.y));
 }
 
@@ -221,6 +236,28 @@ Game.onRemoveAllMobs = function(data) {
 
 /* ITEMS */
 
+Game.onNewItem = function(data) {
+    console.log("New item");
+    items.push(new Item(data.id, game, data.x, data.y));
+}
+
+Game.onRemoveItem = function(data) {
+    var removeItem = itemById(data.id);
+
+    if (!removeItem)
+        return;
+
+    removeItem.destroy();
+
+    items.splice(items.indexOf(removeItem), 1);
+}
+
+Game.onRemoveAllItems = function(data) {
+    for (var i = 0; i < items.length; i++) {
+        items[i].destroy();
+    }
+    items = [];
+}
 
 /* HELPER FUNCTIONS */
 
