@@ -2,6 +2,7 @@ ClientPlayer = function(game, startX, startY) {
     var x = startX;
     var y = startY;
 	this.facing = "right";
+    this.direction = 1;
     this.game = game;
     this.sprite = game.add.sprite(x, y, 'characters', sprites["white_male"]);
 
@@ -52,6 +53,7 @@ ClientPlayer = function(game, startX, startY) {
 }
 
 ClientPlayer.prototype.update = function() {
+    this.sprite.scale.x = this.direction;
     this.sprite.body.velocity.x = 0;
     this.sprite.body.velocity.y = 0;
 }
@@ -124,10 +126,12 @@ ClientPlayer.prototype.moveDown = function() {
 
 ClientPlayer.prototype.moveLeft = function() {
     this.sprite.body.velocity.x -= this.speed;
+    this.direction = -1;
 	this.facing = "left";
 }
 
 ClientPlayer.prototype.moveRight = function() {
     this.sprite.body.velocity.x += this.speed;
+    this.direction = 1;
 	this.facing = "right";
 }
