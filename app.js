@@ -45,6 +45,7 @@ function onSocketConnection(client) {
     client.on('move player', onMovePlayer);
     client.on('new mob', onNewMob);
     client.on('move mob', onMoveMob);
+    client.on('remove mob', onRemoveMob);
     client.on('remove all mobs', onRemoveAllMobs);
 }
 
@@ -120,6 +121,17 @@ function onMoveMob(data) {
 
     // send new mob data to other clients
     this.broadcast.emit('move mob', {id: data.id, x: moveMob.getX(), y: moveMob.getY()});
+}
+
+function onRemoveMob(data) {
+    var removeMob = mobById(data.id);
+
+    if (!removeMob)
+        return;
+
+    io.sockets.emit('remove mob', {id: removeMob.id});
+
+    mobs.splice(mobs.indexOf(removeMob), 1);
 }
 
 function onRemoveAllMobs() {

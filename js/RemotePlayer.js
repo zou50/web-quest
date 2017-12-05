@@ -3,8 +3,9 @@ RemotePlayer = function(index, game, sprite, startX, startY) {
     var y = startY;
 
     this.game = game;
+    
     this.sprite = sprite;
-
+    this.sprite = game.add.sprite(x, y, 'characters', sprites["white_male"]);
     this.sprite.name = index.toString();
 
     // body

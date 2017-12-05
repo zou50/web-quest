@@ -46,8 +46,9 @@ ClientPlayer = function(game, startX, startY) {
     if (this.weapon) {
         this.weapon.anchor.setTo(0.5, 0.5);
     }
-	swing = this.game.add.group();
-	swing.physicsBodyType = Phaser.Physics.ARCADE;
+	this.swing = this.game.add.group();
+    this.swing.enableBody = true;
+	this.swing.physicsBodyType = Phaser.Physics.ARCADE;
 }
 
 ClientPlayer.prototype.update = function() {
@@ -63,8 +64,9 @@ ClientPlayer.prototype.attack = function() {
     // all mobs
     var mobs = Game.getMobs();
     this.isAttacking = true;
-    slashfx = swing.create(player.sprite.x + 15, player.sprite.y, 'slash');
+    slashfx = this.swing.create(this.sprite.x + 15, this.sprite.y, 'slash');
     slashfx.anchor.setTo(0.5, 0.5);
+    slashfx.enableBody = true;
 
     this.weapon.pivot.setTo(-10, -3);
     this.weapon.angle = 90;
@@ -73,6 +75,7 @@ ClientPlayer.prototype.attack = function() {
 
 ClientPlayer.prototype.stopAtk = function() {
     this.isAttacking = false;
+    this.swing.remove(slashfx);
     slashfx.kill();
     this.weapon.angle = 0;
     this.weapon.pivot.setTo(0, 0);

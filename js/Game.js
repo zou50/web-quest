@@ -108,14 +108,17 @@ Game.update = function() {
     }
     for (var i = 0; i < mobs.length; i++) {
         if (mobs[i].sprite.alive) {
-            mobs[i].update();
+            if (game.physics.arcade.overlap(player.swing.children, mobs[i].sprite)) {
+                socket.emit('remove mob', {id: mobs[i].sprite.name});
+                mobs[i].destroy();
+            }
             game.physics.arcade.collide(mobs[i].sprite, blockedLayer);
+            mobs[i].update();
             if (mobs[i].target) {
                 socket.emit('move mob', {id: mobs[i].sprite.name, x: mobs[i].sprite.x, y: mobs[i].sprite.y});
             }
         }
     }
-	game.physics.arcade.overlap(swing,mobs,Game.onRemoveMob,mobs);
     player.update();
 
     if (cursors.up.isDown)
