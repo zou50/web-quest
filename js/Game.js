@@ -110,7 +110,7 @@ Game.update = function() {
             }
         }
     }
-
+	game.physics.arcade.overlap(swing,mobs,Game.onRemoveMob,mobs);
     player.update();
 
     if (cursors.up.isDown)

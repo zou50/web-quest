@@ -18,6 +18,8 @@ ClientPlayer = function(game, startX, startY) {
     // equipment
     this.weapon = this.sprite.addChild(game.make.sprite(11, 0, 'characters', sprites["battleaxe"]));
     this.weapon.anchor.setTo(0.5, 0.5);
+	swing = this.game.add.group();
+	swing.physicsBodyType = Phaser.Physics.ARCADE;
 }
 
 ClientPlayer.prototype.update = function() {
@@ -32,11 +34,10 @@ ClientPlayer.prototype.attack = function() {
         return;
     // all mobs
     var mobs = Game.getMobs();
-    
     this.isAttacking = true;
-    slashfx = game.add.sprite(player.sprite.x + 15, player.sprite.y, 'slash');
+    slashfx = swing.create(player.sprite.x + 15, player.sprite.y, 'slash');
     slashfx.anchor.setTo(0.5, 0.5);
-
+	
     this.weapon.angle = 20;
     this.game.time.events.add(125, this.stopAtk, this);
 }
